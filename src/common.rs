@@ -81,7 +81,7 @@ pub mod test_examples {
         CapacitySchedule {
             // Assume that `user_id` "88" is on-site maintenance team.
             reservations: vec![
-                ReservationRequest::new(1707165008, 1708374608, 64, 88),
+                test_reservation_alpha(),
                 ReservationRequest::new(1708374608, 1710793808, 96, 88),
                 ReservationRequest::new(1710793808, 1711398608, 32, 88),
                 ReservationRequest::new(1711398608, 1713213008, 128, 88),
@@ -100,7 +100,7 @@ pub mod test_examples {
         CapacitySchedule {
             // Assume that `user_id` "88" is on-site maintenance team.
             reservations: vec![
-                ReservationRequest::new(1707165008, 1707769808, 50, 88),
+                test_reservation_alpha(),
                 ReservationRequest::new(1707769808, 1708979408, 80, 88),
                 ReservationRequest::new(1708979408, 1709584208, 40, 88),
                 ReservationRequest::new(1709584208, 1712003408, 100, 88),
