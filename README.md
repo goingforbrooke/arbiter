@@ -47,10 +47,10 @@ todo: write contributing section in `README.md`
 
 ### Plan
 
-[ ] RESTful API with some tests
+- [ ] RESTful API with some tests
     - `reserve(start_time, end_time, amount)`
         - add `user_id` for BI/marketing teams benefit
-[ ] work out logic behind REST calls
+- [ ] work out logic behind REST calls
     - test client tests
         - expected behavior
             - ? consider different outcomes for `start_time`
@@ -77,7 +77,7 @@ todo: write contributing section in `README.md`
                 - ? `amount` exceeds total capacity of cluster at zero utilization?
             - ? allocation edge cases?
                 - ensure 15% "float" capacity for "just-wanna-try-it" folks
-[ ] migrate file to SQL DB backing 
+- [ ] migrate file to SQL DB backing 
 
 ### Future: nice-to-haves
 
