@@ -28,17 +28,13 @@ fn evaluate_reservation_request() {
 #[cfg(test)]
 mod tests {
     use crate::ReservationRequest;
-    // Theoretical reservation request.
-    const TEST_RESERVATION: ReservationRequest = ReservationRequest {
-        start_time: 1707165008,
-        end_time: 1708374608,
-        capacity_amount: 64,
-        user_id: 42,
-    };
 
     // Reservation request that fit neatly inside of a "schedule fence" that has capacity.
     #[test]
-    fn within_fences_with_capacity() {}
+    fn within_fences_with_capacity() {
+        // Theoretical reservation request.
+        let test_reservation = ReservationRequest::new(1707165008, 1708374608, 64, 42);
+    }
 
     // Reservation request that fit neatly inside of a "schedule fence" with insufficient capacity.
     #[test]
