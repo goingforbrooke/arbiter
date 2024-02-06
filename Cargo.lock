@@ -40,7 +40,6 @@ dependencies = [
  "fern",
  "humantime",
  "log",
- "serde",
  "tokio",
  "warp",
 ]
