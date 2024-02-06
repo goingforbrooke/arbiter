@@ -4,7 +4,7 @@
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
 
-// temp: Pull in existing rez request struct, which will be centralized later.
+use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
 fn thing() {
