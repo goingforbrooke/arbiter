@@ -20,6 +20,32 @@ fn greeting_route() -> impl Filter<Extract = (String,), Error = warp::Rejection>
     warp::path!("hello" / String).map(|name: String| format!("Hello, {}!", name))
 }
 
+// Define JSON parameters for reservation REST requests.
+#[derive(Deserialize, Serialize)]
+struct ReservationRequest {
+    start_time: i64,
+    end_time: i64,
+    capacity_amount: u32,
+    user_id: u32,
+}
+
+// Reserve some resource capacity within a timeframe.
+//
+// # Parameters
+// - `start_time`: Reservation start time, represented unix epoch format.
+// - `end_time`: Reservation end time, represented by unix epoch format.
+// - `capacity_amount`: Amount of resource you'd like to have allocated.
+// - `user_id`: Your unique identifier.
+fn reservation_route() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Copy {
+    warp::path!("reserve")
+        // Only POST requests can ferry JSON bodies (*usually*).
+        .and(warp::post())
+        // Expect JSON body format to follow our definition.
+        //.and(warp::body::json::<ReservationRequest>())
+        .and(warp::body::json())
+        .map(|data: ReservationRequest| warp::reply::json(&data))
+}
+
 #[tokio::main]
 async fn main() {
     let _ = setup_native_logging();
