@@ -10,8 +10,7 @@ Arbiter is a simple resource scheduler.
     - Implement scheduling and error handling for non-viable requests.
     - Total available capacity increases and decreases on a schedule that you know in advance.
 - Select an appropriate data store.
-    - Decide how to represent the data.
-    - Be prepared to explain your thinking about the data store and the representation you chose.
+    - Decide how to represent the data. Be prepared to explain your thinking about the data store and the representation you chose.
     - Create interfaces for the service to interact with the data store.
 - Your service should have this function for interacting with the schedule:
     - `reserve(start_time, end_time, amount)`
@@ -74,18 +73,32 @@ todo: write contributing section in `README.md`
                 - `start_time` and `end_time` are in unix epoch format
                     - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
                 - `start_time` after `end_time`
-                - `end_tiem` after `start_time`
+                - `end_time` after `start_time`
                 - ? `amount` exceeds total capacity of cluster at zero utilization?
             - ? allocation edge cases?
                 - ensure 15% "float" capacity for "just-wanna-try-it" folks
 - [ ] migrate file to SQL DB backing 
+    - tables
+        - user requests
+            - user_id, start, end, denied/allowed (bool)
+        - ? separate or combined?
+            - active reservations
+                - `{1707165008, 1708374608, 64}`
+                - start, end, capacity
+            - cluster capacity
+                - `{1707165008, 1708374608, 64}`
+                - start, end, capacity
 
 ### Future: nice-to-haves
 
 - can't-do-but suggestions
-    - "negotiator" suggestions
-        - next timeframe that capacity is available
-        - less capacity during the same timeframe
+    - "negotiator"
+        - suggestions
+            - next timeframe that capacity is available
+            - less capacity during the same timeframe
+        - polynomial "sliders" (y=mx+b)
+            - x: time
+            - y: capacity
 - user ID tracking
     - BI folks: what should we include in the next datacenter that we build?
     - marketing folks: what's selling
