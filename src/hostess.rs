@@ -13,6 +13,11 @@ use crate::ReservationRequest;
 ///
 /// The given timeslot's checked against the capacity schedule to see if there's enough idle
 /// capacity's available during that timeframe.
+///
+/// While there are more efficient algorithms for finding a timeslot, here we prioritize a
+/// solution that's easy to modify and reason about. We're not anticipating a ton of requests
+/// every second, so performance isn't the first concern. Rather, the most likely question
+/// to follow an allocation denial is "why not?" Followed shortly by "then when?"
 fn evaluate_reservation_request(
     reservation_request: ReservationRequest,
     capacity_schedule: CapacitySchedule,
