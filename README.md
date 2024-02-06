@@ -44,6 +44,10 @@ todo: write contributing section in `README.md`
 
 ## 📐 Design Decisions
 
+### Limitations
+
+Reservation requests must start and end within the provided schedule. While the resource may be available outside of this timeframe, that exceeds Arbiter's purview. Resource capacity outside of the schedule is assumed to be zero.
+
 ### Plan
 
 - [x] logging
