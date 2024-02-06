@@ -10,5 +10,5 @@ use logging::setup_native_logging;
 
 fn main() {
     let _ = setup_native_logging();
-    info!("Hello world");
+    info!("Done");
 }
