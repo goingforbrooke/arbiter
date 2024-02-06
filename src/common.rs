@@ -41,7 +41,7 @@ impl ReservationRequest {
     }
 }
 
-// Print instantiated struct nicely
+// Print instantiated struct nicely.
 impl fmt::Display for ReservationRequest {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(
