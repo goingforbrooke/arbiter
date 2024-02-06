@@ -9,14 +9,15 @@ use warp::Filter;
 mod logging;
 use logging::setup_native_logging;
 
+fn hello_route() -> impl Filter<Extract = (String,), Error = warp::Rejection> + Copy {
+    warp::path!("hello" / String).map(|name: String| format!("Hello, {}!", name))
+}
+
 #[tokio::main]
 async fn main() {
     let _ = setup_native_logging();
 
-    // `user@host: wget -qO- localhost:4242/hello/Eisenhorn` -> Hello, Eisenhorn
-    let hello_route = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
-
-    warp::serve(hello_route).run(([127, 0, 0, 1], 4242)).await;
+    warp::serve(hello_route()).run(([127, 0, 0, 1], 4242)).await;
 
     info!("Done");
 }
@@ -25,9 +26,10 @@ async fn main() {
 async fn test_hello() {
     let filter = hello_route();
 
+    // `user@host: wget -qO- localhost:4242/hello/Eisenhorn` -> Hello, Eisenhorn
     let api_response = warp::test::request()
         .method("GET")
-        .path("/Eisenhorn")
+        .path("/hello/Eisenhorn")
         .reply(&filter);
-    assert_eq!(api_response.status(), 200);
+    assert_eq!(api_response.await.status(), 200);
 }
