@@ -65,10 +65,15 @@ todo: write contributing section in `README.md`
 - [ ] work out logic behind REST calls
     - test client tests
         - expected behavior
-            - ? consider different outcomes for `start_time`
-                - starts immediately vs starts a week from now
-                    - now: account for spinup time?
-                    - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
+            - other stuff
+                - `now()` is `start_time`
+                    - **? consider different outcomes for `start_time`**
+                        - starts immediately vs starts a week from now
+                            - now: account for spinup time?
+                            - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
+                - edge case: request is larger than total capacity
+                    - from prompt
+                        - Here a ‘resource’ is represented simply as an integer smaller than the total capacity.
             - ... **within** timeframe fences
                 - capacity **is** available -> allocate (add to db); return success
                     - start time
