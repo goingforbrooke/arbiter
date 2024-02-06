@@ -1,8 +1,8 @@
 // Standard library crates.
-#[allow(unused)]
-use log::{debug, error, info, trace, warn};
 
 // External crates.
+#[allow(unused)]
+use log::{debug, error, info, trace, warn};
 
 // Project modules
 mod logging;
