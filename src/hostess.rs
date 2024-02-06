@@ -2,9 +2,11 @@
 use std::error::Error;
 
 // External crates.
+use anyhow::{anyhow, ensure, Result};
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
 
+// Project crates.
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
@@ -15,14 +17,45 @@ use crate::ReservationRequest;
 fn evaluate_reservation_request(
     reservation_request: ReservationRequest,
     capacity_schedule: CapacitySchedule,
-) -> Result<(), Box<dyn Error>> {
-    capacity_schedule
-        .reservations
-        .iter()
-        .for_each(|reservation| {
-            info!("Reservation: {}", reservation);
-        });
-    Ok(())
+) -> Result<bool> {
+    // Ensure the given schedule isn't empty.
+    ensure!(
+        capacity_schedule.reservations.is_empty(),
+        "Given Capacity Schedule has no reservations."
+    );
+    debug!("Evaluating reservation request: {}", reservation_request);
+
+    // Track the total capacity for each timeframe-compatible reservation.
+    let mut reservation_capacities: Vec<u32> = Vec::new();
+
+    // todo: Evaluate existing reservations in reverse (newest-to-oldest) so there's fewer to go through.
+    for existing_reservation in capacity_schedule.reservations.iter() {
+        debug!(
+            "Evaluating against existing reservation: {}",
+            existing_reservation
+        );
+        // If this reservation starts within the first reservation's timeframe...
+        if existing_reservation.start_time == reservation_request.start_time {
+            debug!(
+                "Found that existing reservation's timeframe {} applies to reservation request's timeframe {}",
+                existing_reservation, reservation_request
+            );
+            // ... then note its total capacity as a limiting factor.
+            reservation_capacities.push(existing_reservation.capacity_amount);
+        }
+    }
+
+    // Find lowest total resource capacity among existing reservation's with applicable timeframes.
+    let minimum_capacity: &u32 = match reservation_capacities.iter().min() {
+        Some(min_found) => min_found,
+        None => return Err(anyhow!("No applicable reservation capacities were found.")),
+    };
+
+    // Check if lowest available capacity across existing reservations can sate request.
+    let is_reservable: bool = minimum_capacity >= &reservation_request.capacity_amount;
+    info!("Reservation request is possible");
+
+    Ok(is_reservable)
 }
 
 /// Test if schedules are being assessed correctly.
