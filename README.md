@@ -47,7 +47,7 @@ todo: write contributing section in `README.md`
 ### Plan
 
 - [x] logging
-- [ ] RESTful API with some tests
+- [x] RESTful API with some tests
     - POST `reserve(start_time, end_time, capacity_amount, user_id)`
         - original: `reserve(start_time, end_time, amount)`
         - add `user_id` for BI/marketing teams benefit
