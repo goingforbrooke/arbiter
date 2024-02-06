@@ -56,7 +56,7 @@ impl fmt::Display for ReservationRequest {
 ///
 /// This schedule will never change or fail.
 pub struct CapacitySchedule {
-    reservations: Vec<ReservationRequest>,
+    pub reservations: Vec<ReservationRequest>,
 }
 
 /// Example instances of common scheduling structs that are available to all tests.
