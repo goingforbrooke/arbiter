@@ -1,4 +1,4 @@
-//! Common structs for Glazier.
+//! Common structs for Arbiter.
 
 // Standard library crates.
 use std::fmt;
