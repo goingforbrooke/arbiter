@@ -78,6 +78,9 @@ mod tests {
     //
 
     // Reservation request that fit neatly inside of a "schedule fence" that has capacity.
+    //
+    // A laughably easy test that requests exactly what's available in exactly the
+    // timeframe where it first becomes available.
     #[test]
     fn test_within_fences_with_capacity() {
         // Reservation request that exactly matches available timeframe and capacity.
