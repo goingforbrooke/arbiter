@@ -13,10 +13,10 @@ use logging::setup_native_logging;
 async fn main() {
     let _ = setup_native_logging();
 
-    // `user@host: wget -qO- localhost:4242/reserve/Eisenhorn` -> Hello, Eisenhorn
-    let hello = warp::path!("reserve" / String).map(|name| format!("Hello, {}!", name));
+    // `user@host: wget -qO- localhost:4242/hello/Eisenhorn` -> Hello, Eisenhorn
+    let hello_route = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
 
-    warp::serve(hello).run(([127, 0, 0, 1], 4242)).await;
+    warp::serve(hello_route).run(([127, 0, 0, 1], 4242)).await;
 
     info!("Done");
 }
