@@ -44,5 +44,5 @@ async fn test_greeting_route() {
         .method("GET")
         .path("/hello/Eisenhorn")
         .reply(&route_filter);
-    assert_eq!(api_response.await.status(), 200);
+    assert_eq!(api_response.await.body(), "Hello, Eisenhorn!");
 }
