@@ -1,9 +1,12 @@
 // Standard library crates.
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
+// Serialize JSON payloads.
+use serde_derive::{Deserialize, Serialize};
+// Test only: Deserialize JSON response (already dependency for Warped).
+use serde_json::from_slice;
 
 // External crates.
-use serde_derive::{Deserialize, Serialize};
 use warp::Filter;
 
 // Project modules
@@ -104,8 +107,12 @@ async fn test_reservation_route() {
         .reply(&route_filter)
         .await;
     assert_eq!(api_response.status(), 200);
-    let json_body = api_response.body();
-    //assert(json_body.start_time, 1707165008)
-    //{"start_time":1707165008,"end_time":1708374608,"capacity_amount":64,"user_id":42}
-    //assert_eq!(api_response.body(), "Hello, Eisenhorn!");
+
+    let rest_response = api_response.body();
+    // Deserialize JSON from HTML body.
+    let jsonified_body: ReservationRequest = from_slice(rest_response).unwrap();
+    assert_eq!(jsonified_body.start_time, 1707165008);
+    assert_eq!(jsonified_body.end_time, 1708374608);
+    assert_eq!(jsonified_body.capacity_amount, 64);
+    assert_eq!(jsonified_body.user_id, 42);
 }
