@@ -1,6 +1,7 @@
 //! Common structs for Glazier.
 
 // Standard library crates.
+use std::fmt;
 
 // External crates.
 #[allow(unused)]
@@ -37,5 +38,16 @@ impl ReservationRequest {
             capacity_amount,
             user_id,
         }
+    }
+}
+
+// Print instantiated struct nicely
+impl fmt::Display for ReservationRequest {
+    fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            formatter,
+            "start_time: {}, end_time: {}, capacity_amount: {}, user_id: {}",
+            self.start_time, self.end_time, self.capacity_amount, self.user_id
+        )
     }
 }
