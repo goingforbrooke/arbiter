@@ -52,9 +52,11 @@ fn evaluate_reservation_request(
 
     // Check if lowest available capacity across existing reservations can sate request.
     let is_reservable: bool = minimum_capacity >= &reservation_request.capacity_amount;
+
+    let verbal_decree: &str = if is_reservable { "Approved" } else { "Denied" };
     info!(
-        "Reservation request by user ID \"{}\" is possible",
-        reservation_request.user_id
+        "{} request by user ID \"{}\": {}",
+        verbal_decree, reservation_request.user_id, reservation_request
     );
 
     Ok(is_reservable)
