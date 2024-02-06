@@ -1,3 +1,5 @@
+//! Common structs for Glazier.
+
 // Standard library crates.
 
 // External crates.
