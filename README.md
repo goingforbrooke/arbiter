@@ -86,6 +86,7 @@ todo: write contributing section in `README.md`
                 - outside of schedule timeframe
                     - assume the worst: no capacity available
                         - default to zero
+                        - error message: while resource may be availble for the period you gave, it's outside of Arbier's purview. Please choose a timeframe between {schedule_max} and {schedule_min}
                 - `start_time` before `end_time` and vice versa
                     - add test
                     - throw informative error
