@@ -9,6 +9,11 @@ use warp::{http::Response, Filter};
 mod logging;
 use logging::setup_native_logging;
 
+// Extract the first parameter (a name) from the path and prepend a greeting to it.
+fn create_greeting() -> impl Filter<Extract = (String,), Error = warp::Rejection> + Copy {
+    warp::path::param().map(|name: String| format!("Hello, {}!", name))
+}
+
 #[tokio::main]
 async fn main() {
     let _ = setup_native_logging();
