@@ -51,3 +51,10 @@ impl fmt::Display for ReservationRequest {
         )
     }
 }
+
+/// A capacity schedule for a resource.
+///
+/// This schedule will never change or fail.
+pub struct CapacitySchedule {
+    reservations: Vec<ReservationRequest>,
+}
