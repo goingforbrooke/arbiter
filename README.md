@@ -47,7 +47,15 @@ todo: write contributing section in `README.md`
 ### Plan
 
 - [x] logging
+    - [ ] initialize in `prelude.rs`
 - [x] RESTful API with some tests
+    - [ ] param checking
+        - `start_time` before `end_time` and vice versa
+            - add test
+            - throw informative error
+        - `start_time` and `end_time` are unix seconds
+            - add test
+            - throw informative error
     - POST `reserve(start_time, end_time, capacity_amount, user_id)`
         - original: `reserve(start_time, end_time, amount)`
         - add `user_id` for BI/marketing teams benefit
