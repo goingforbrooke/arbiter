@@ -81,60 +81,72 @@ todo: write contributing section in `README.md`
 
 ### Future: nice-to-haves
 
-    - can't-do-but suggestions
-        - "negotiator" suggestions
-            - next timeframe that capacity is available
-            - less capacity during the same timeframe
-    - user ID tracking
-        - BI folks: what should we include in the next datacenter that we build?
-        - marketing folks: what's selling
-        - SRE dashboard: is something busted in a weird way
+- can't-do-but suggestions
+    - "negotiator" suggestions
+        - next timeframe that capacity is available
+        - less capacity during the same timeframe
+- user ID tracking
+    - BI folks: what should we include in the next datacenter that we build?
+    - marketing folks: what's selling
+    - SRE dashboard: is something busted in a weird way
 
 ### Known Unknowns
-    - ~~total capacity == total capacity of hardware?~~
-        - total cap == total hardware cap
-    - ~~interval: live or batch?~~
-        - live
-    - ~~optimization priority?~~
-        - **resource utilization**
-        - user latency
-            - having to wait forever might get frustrating
-                - could set aside a small amount for "just-try-it-out" users
-        - reliability (resource failure fault tolerance)
-            - what if schedule changes?
-                - ex.
-                    - assume two datacenters: A100s and H100s in different locales
-                    - timeline
-                        - customer buys A100 cluster
-                        - A100 cluster floods
-                        - scheduler needs to be able to reassign to H100 center
-                            - will lose some money b/c lower $/hr
-                            - won't lose all of the money
-                            - won't lose reputation reliability
-    - ~~applicable to multiple types of resources?~~
-        - just one
-    - ~~BI and marketing people want to query data?~~
-        - free to add `user_id` to function request
-- assumptions
-    - provided schedule will never change or fail
-    - okay to lock up if someone's already making an allocation
-- architecture
-    - RESTful API
-        - Warp b/c simple and composable
-        - allows for concurrent requests
-            - "lock" allocations if a user makes a request while another is being assessed
-                - SQL db allows
-    - SQL DB
-        - pros
-            - keep the implementation simple
-            - easy to reason about
-            - easy to build on
-            - SQLite might be easier at first
-            - future: PosgreSQL
-        - why not files?
-            - more complex to reason about
-            - eventual performance issues: aggregating every row will start to add up over time
-            - notable pros include simplicity and no external dependencies
+
+- ~~total capacity == total capacity of hardware?~~
+    - total cap == total hardware cap
+- ~~interval: live or batch?~~
+    - live
+- ~~optimization priority?~~
+    - **resource utilization**
+    - user latency
+        - having to wait forever might get frustrating
+            - could set aside a small amount for "just-try-it-out" users
+    - reliability (resource failure fault tolerance)
+        - what if schedule changes?
+            - ex.
+                - assume two datacenters: A100s and H100s in different locales
+                - timeline
+                    - customer buys A100 cluster
+                    - A100 cluster floods
+                    - scheduler needs to be able to reassign to H100 center
+                        - will lose some money b/c lower $/hr
+                        - won't lose all of the money
+                        - won't lose reputation reliability
+- ~~applicable to multiple types of resources?~~
+    - just one
+- ~~BI and marketing people want to query data?~~
+    - free to add `user_id` to function request
+
+### Assumptions
+
+- provided schedule will never change or fail
+- okay to lock up if someone's already making an allocation
+
+### Architecture
+
+- RESTful API
+    - Warp b/c simple and composable
+        - also, big `seamonstar` fan
+    - runner up: Rocket
+        - simpler, but only recently out of nightly
+    - runner up: Tide
+        - too young
+    - allows for concurrent requests
+        - "lock" allocations if a user makes a request while another is being assessed
+            - SQL db allows
+- SQL DB
+    - pros
+        - keep the implementation simple
+        - easy to reason about
+        - easy to build on
+        - SQLite might be easier at first
+        - future: PosgreSQL
+    - why not files?
+        - more complex to reason about
+        - eventual performance issues: aggregating every row will start to add up over time
+        - notable pros include simplicity and no external dependencies
+    - access pattern
+        - ORM would be too much at this stage
 
 ## 🐭 Misc.
 
