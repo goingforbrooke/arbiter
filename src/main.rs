@@ -3,7 +3,7 @@
 use log::{debug, error, info, trace, warn};
 
 // External crates.
-use warp::Filter;
+use warp::{http::Response, Filter};
 
 // Project modules
 mod logging;
@@ -14,7 +14,10 @@ async fn main() {
     let _ = setup_native_logging();
 
     // `user@host: wget -qO- localhost:4242/hello/Eisenhorn` -> Hello, Eisenhorn
-    let hello_route = warp::path!("hello" / String).map(|name| format!("Hello, {}!", name));
+    let hello_route = warp::path!("hello")
+        .and(create_greeting())
+        // Add created greeting to HTML response body.
+        .map(|greeting: String| Response::builder().body(greeting));
 
     warp::serve(hello_route).run(([127, 0, 0, 1], 4242)).await;
 
