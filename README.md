@@ -71,7 +71,7 @@ todo: write contributing section in `README.md`
                 - edge case: request is larger than total capacity
                     - from prompt
                         - Here a ‘resource’ is represented simply as an integer smaller than the total capacity.
-            - ... **within** timeframe fences
+            - ... **within** a timeframe fence
                 - capacity **is** available -> allocate (add to db); return success
                     - start time
                         - now
@@ -83,6 +83,9 @@ todo: write contributing section in `README.md`
                 - capacity **is** available -> allocate (add to db); return success
                 - capacity **not** available -> return sorry
         - edge cases
+                - outside of schedule timeframe
+                    - assume the worst: no capacity available
+                        - default to zero
                 - `start_time` before `end_time` and vice versa
                     - add test
                     - throw informative error
