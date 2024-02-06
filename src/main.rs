@@ -20,3 +20,16 @@ async fn main() {
 
     info!("Done");
 }
+
+#[tokio::test]
+// Test the Warp filter that constructs the greeting
+async fn test_hello() {
+    let test_filter = create_greeting();
+
+    let filter_response = warp::test::request()
+        .path("/Eisenhorn")
+        .filter(&test_filter)
+        .await
+        .unwrap();
+    assert_eq!(filter_response, "Hello, Eisenhorn!");
+}
