@@ -85,12 +85,7 @@ mod tests {
         let route_filter = reservation_route();
 
         // Define JSON parameters for theoretical reservation REST request.
-        let test_reservation = ReservationRequest {
-            start_time: 1707165008,
-            end_time: 1708374608,
-            capacity_amount: 64,
-            user_id: 42,
-        };
+        let test_reservation = ReservationRequest::new(1707165008, 1708374608, 64, 42);
 
         let api_response = warp::test::request()
             .path("/reserve")
