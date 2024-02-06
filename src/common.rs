@@ -8,11 +8,11 @@ use log::{debug, error, info, trace, warn};
 // Serialize JSON payloads.
 use serde_derive::{Deserialize, Serialize};
 
-// A capacity reservation requests.
-//
-// This is used for RESTful JSON parameters, reservation logic, test creation, and datastore
-// retrieval. It can represent a request for a portion of a resource or a portion that's already
-// been allocated.
+/// A capacity reservation request.
+///
+/// This is used for RESTful JSON parameters, reservation logic, test creation, and datastore
+/// retrieval. It can represent a request for a portion of a resource or a portion that's already
+/// been allocated.
 #[derive(Deserialize, Serialize)]
 pub struct ReservationRequest {
     pub start_time: i64,
