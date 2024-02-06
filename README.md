@@ -112,9 +112,10 @@ todo: write contributing section in `README.md`
 
 ### Future: nice-to-haves
 
+- convert to unixtime object ASAP instead of `int`
 - Swagger spec docs for RESTful API
 - add test for RESTful API initialization
-- can't-do-but suggestions
+- can't-do-but enhancement suggestions from me
     - "negotiator"
         - suggestions
             - next timeframe that capacity is available
