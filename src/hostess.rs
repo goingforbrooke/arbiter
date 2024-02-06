@@ -7,8 +7,8 @@ use log::{debug, error, info, trace, warn};
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
-fn thing() {
-    info!("wow")
+fn evaluate_reservation_request() {
+    info!("wow");
 }
 
 // Test if schedules are being assessed correctly.
