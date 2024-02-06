@@ -3,6 +3,7 @@
 use log::{debug, error, info, trace, warn};
 
 // External crates.
+use serde_derive::{Deserialize, Serialize};
 use warp::Filter;
 
 // Project modules
