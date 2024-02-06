@@ -31,11 +31,14 @@ async fn main() {
 }
 
 // Test if the greeting route works correctly.
+//
+// This is the equivalent of:
+// `user@host: wget -qO- localhost:4242/hello/Eisenhorn`
+// `Hello, Eisenhorn`
 #[tokio::test]
 async fn test_hello() {
     let route_filter = greeting_route();
 
-    // `user@host: wget -qO- localhost:4242/hello/Eisenhorn` -> Hello, Eisenhorn
     let api_response = warp::test::request()
         .method("GET")
         .path("/hello/Eisenhorn")
