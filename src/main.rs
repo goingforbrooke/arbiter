@@ -9,6 +9,12 @@ use warp::Filter;
 mod logging;
 use logging::setup_native_logging;
 
+// Greet the user by name.
+//
+// "Hello" will be prepended to the name provided in the URL and returned in the HTML body.
+//
+// # Returns
+// HTML body with `"Hello, <given_name>!"`.
 fn greeting_route() -> impl Filter<Extract = (String,), Error = warp::Rejection> + Copy {
     warp::path!("hello" / String).map(|name: String| format!("Hello, {}!", name))
 }
@@ -24,6 +30,7 @@ async fn main() {
     info!("Done");
 }
 
+// Test if the greeting route works correctly.
 #[tokio::test]
 async fn test_hello() {
     let route_filter = greeting_route();
