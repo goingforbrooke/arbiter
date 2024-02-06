@@ -22,11 +22,11 @@ fn greeting_route() -> impl Filter<Extract = (String,), Error = warp::Rejection>
 
 // Define JSON parameters for reservation REST requests.
 #[derive(Deserialize, Serialize)]
-struct ReservationRequest {
-    start_time: i64,
-    end_time: i64,
-    capacity_amount: u32,
-    user_id: u32,
+pub struct ReservationRequest {
+    pub start_time: i64,
+    pub end_time: i64,
+    pub capacity_amount: u32,
+    pub user_id: u32,
 }
 
 // Reserve some resource capacity within a timeframe.

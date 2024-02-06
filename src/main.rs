@@ -5,6 +5,7 @@
 use log::{debug, error, info, trace, warn};
 
 // Project modules
+mod hostess;
 mod logging;
 use logging::setup_native_logging;
 mod restful_api;
