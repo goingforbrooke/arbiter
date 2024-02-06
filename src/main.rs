@@ -43,6 +43,8 @@ async fn test_greeting_route() {
     let api_response = warp::test::request()
         .method("GET")
         .path("/hello/Eisenhorn")
-        .reply(&route_filter);
-    assert_eq!(api_response.await.body(), "Hello, Eisenhorn!");
+        .reply(&route_filter)
+        .await;
+    assert_eq!(api_response.body(), "Hello, Eisenhorn!");
+    assert_eq!(api_response.status(), 200);
 }
