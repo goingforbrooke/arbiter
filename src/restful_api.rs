@@ -1,14 +1,15 @@
 // Standard library crates.
-#[allow(unused)]
 use std::error::Error;
 
 // External crates.
+#[allow(unused)]
 use log::{debug, error, info, trace, warn};
-// Serialize JSON payloads.
-use serde_derive::{Deserialize, Serialize};
 // Test only: Deserialize JSON response (already dependency for Warped).
 use serde_json::from_slice;
 use warp::Filter;
+
+// Project crates.
+use crate::ReservationRequest;
 
 // Greet the user by name.
 //
@@ -18,15 +19,6 @@ use warp::Filter;
 // HTML body with `"Hello, <given_name>!"`.
 fn greeting_route() -> impl Filter<Extract = (String,), Error = warp::Rejection> + Copy {
     warp::path!("hello" / String).map(|name: String| format!("Hello, {}!", name))
-}
-
-// Define JSON parameters for reservation REST requests.
-#[derive(Deserialize, Serialize)]
-pub struct ReservationRequest {
-    pub start_time: i64,
-    pub end_time: i64,
-    pub capacity_amount: u32,
-    pub user_id: u32,
 }
 
 // Reserve some resource capacity within a timeframe.
@@ -85,7 +77,7 @@ async fn test_greeting_route() {
 async fn test_reservation_route() {
     let route_filter = reservation_route();
 
-    // Theoretical reservation request.
+    // Define JSON parameters for theoretical reservation REST request.
     let test_reservation = ReservationRequest {
         start_time: 1707165008,
         end_time: 1708374608,

@@ -5,7 +5,7 @@
 use log::{debug, error, info, trace, warn};
 
 // temp: Pull in existing rez request struct, which will be centralized later.
-use crate::restful_api::ReservationRequest;
+use crate::ReservationRequest;
 
 fn thing() {
     info!("wow")
@@ -27,8 +27,7 @@ fn thing() {
 //    - `{1712608208, 1714422608, 60}`
 #[cfg(test)]
 mod tests {
-    // temp: Pull in existing rez request struct, which will be centralized later.
-    use crate::restful_api::ReservationRequest;
+    use crate::ReservationRequest;
     // Theoretical reservation request.
     const TEST_RESERVATION: ReservationRequest = ReservationRequest {
         start_time: 1707165008,

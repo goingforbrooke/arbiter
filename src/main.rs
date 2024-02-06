@@ -5,6 +5,9 @@
 use log::{debug, error, info, trace, warn};
 
 // Project modules
+mod common;
+// Make reservation requests available everywhere via re-export b/c used often.
+pub use common::ReservationRequest;
 mod hostess;
 mod logging;
 use logging::setup_native_logging;
