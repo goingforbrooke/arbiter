@@ -48,7 +48,8 @@ todo: write contributing section in `README.md`
 
 - [x] logging
 - [ ] RESTful API with some tests
-    - `reserve(start_time, end_time, amount)`
+    - POST `reserve(start_time, end_time, capacity_amount, user_id)`
+        - original: `reserve(start_time, end_time, amount)`
         - add `user_id` for BI/marketing teams benefit
 - [ ] work out logic behind REST calls
     - test client tests
