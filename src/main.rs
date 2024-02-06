@@ -36,7 +36,7 @@ async fn main() {
 // `user@host: wget -qO- localhost:4242/hello/Eisenhorn`
 // `Hello, Eisenhorn`
 #[tokio::test]
-async fn test_hello() {
+async fn test_greeting_route() {
     let route_filter = greeting_route();
 
     let api_response = warp::test::request()
