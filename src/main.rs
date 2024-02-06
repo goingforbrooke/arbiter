@@ -73,6 +73,39 @@ async fn test_greeting_route() {
         .path("/hello/Eisenhorn")
         .reply(&route_filter)
         .await;
-    assert_eq!(api_response.body(), "Hello, Eisenhorn!");
     assert_eq!(api_response.status(), 200);
+    assert_eq!(api_response.body(), "Hello, Eisenhorn!");
+}
+
+// Test if the reservation route works correctly.
+//
+// This is the equivalent of:
+// `user@host: wget -qO- localhost:4242/hello/Eisenhorn`
+// `wget --method=POST -O- -q --body-data='{"start_time": 1707165008, "end_time": 1708374608, "capacity_amount": 64, "user_id": 42}' --header=Content-Type:application/json localhost:4242/reserve`
+// {"start_time":1707165008,"end_time":1708374608,"capacity_amount":64,"user_id":42}
+#[tokio::test]
+async fn test_reservation_route() {
+    let route_filter = reservation_route();
+
+    // Theoretical reservation request.
+    let test_reservation = ReservationRequest {
+        start_time: 1707165008,
+        end_time: 1708374608,
+        capacity_amount: 64,
+        user_id: 42,
+    };
+
+    let api_response = warp::test::request()
+        .path("/reserve")
+        // POST is required for sending RESTful (JSON) requests.
+        .method("POST")
+        // Serialize request body into JSON.
+        .json(&test_reservation)
+        .reply(&route_filter)
+        .await;
+    assert_eq!(api_response.status(), 200);
+    let json_body = api_response.body();
+    //assert(json_body.start_time, 1707165008)
+    //{"start_time":1707165008,"end_time":1708374608,"capacity_amount":64,"user_id":42}
+    //assert_eq!(api_response.body(), "Hello, Eisenhorn!");
 }
