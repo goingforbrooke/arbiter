@@ -92,6 +92,7 @@ todo: write contributing section in `README.md`
 
 ### Future: nice-to-haves
 
+- Swagger spec docs for RESTful API
 - can't-do-but suggestions
     - "negotiator"
         - suggestions
