@@ -53,6 +53,7 @@ mod tests {
     use serde_json::from_slice;
 
     // Project crates.
+    use crate::common::test_examples::test_reservation_alpha;
     use crate::restful_api::greeting_route;
     use crate::restful_api::reservation_route;
     use crate::ReservationRequest;
@@ -85,7 +86,8 @@ mod tests {
         let route_filter = reservation_route();
 
         // Define JSON parameters for theoretical reservation REST request.
-        let test_reservation = ReservationRequest::new(1707165008, 1708374608, 64, 42);
+        //1707165008, 1708374608, 64, 42
+        let test_reservation = test_reservation_alpha();
 
         let api_response = warp::test::request()
             .path("/reserve")

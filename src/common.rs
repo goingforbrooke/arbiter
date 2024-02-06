@@ -61,9 +61,16 @@ pub struct CapacitySchedule {
 
 /// Example instances of common scheduling structs that are available to all tests.
 #[cfg(test)]
-mod test_examples {
+pub mod test_examples {
     use super::CapacitySchedule;
     use super::ReservationRequest;
+
+    /// Test reservation request
+    ///
+    /// This is based off Schedule 1's first reservation.
+    pub fn test_reservation_alpha() -> ReservationRequest {
+        ReservationRequest::new(1707165008, 1708374608, 64, 42)
+    }
 
     /// - Schedule 1
     ///    - `{1707165008, 1708374608, 64}`
