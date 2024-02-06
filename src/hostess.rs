@@ -1,5 +1,4 @@
 // Standard library crates.
-use std::error::Error;
 
 // External crates.
 use anyhow::{anyhow, ensure, Result};
