@@ -56,7 +56,7 @@ todo: write contributing section in `README.md`
         - `start_time` and `end_time` are unix seconds
             - add test
             - throw informative error
-        - other random parameters
+        - random parameters that we didn't ask for (ex. `"emojis": "lol"`)
             - add test
             - throw informative error
     - POST `reserve(start_time, end_time, capacity_amount, user_id)`
@@ -109,6 +109,7 @@ todo: write contributing section in `README.md`
 ### Future: nice-to-haves
 
 - Swagger spec docs for RESTful API
+- add test for RESTful API initialization
 - can't-do-but suggestions
     - "negotiator"
         - suggestions
@@ -121,6 +122,7 @@ todo: write contributing section in `README.md`
     - BI folks: what should we include in the next datacenter that we build?
     - marketing folks: what's selling
     - SRE dashboard: is something busted in a weird way
+- Add testable `Examples` to fx docstrings
 
 ### Known Unknowns
 
