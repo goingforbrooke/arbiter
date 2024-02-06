@@ -58,16 +58,16 @@ todo: write contributing section in `README.md`
                     - now: account for spinup time?
                     - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
             - ... **within** timeframe fences
-                - capacity **is** available -> allocate (add to db); return success
+                - capacity **is** available => allocate (add to db); return success
                     - start time
                         - now
                             - allocate (add to db), return reservation complete and started. UID: 4242
                         - not-now
                             - allocate (add to db), return reservation complete. UID: 4242
-                - capacity **not** available - return sorry
+                - capacity **not** available => return sorry
             - ... **across** timeframe fences (need fx for combining inter-timeframe queries: "Create interfaces for the service to interact with the data store")
-                - capacity **is** available -> allocate (add to db); return success
-                - capacity **not** available - return sorry
+                - capacity **is** available => allocate (add to db); return success
+                - capacity **not** available => return sorry
         - edge cases
             - input checking
                 - `start_time` and `end_time` are in unix epoch format
