@@ -4,8 +4,6 @@ use std::error::Error;
 // External crates.
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
-// Test only: Deserialize JSON response (already dependency for Warped).
-use serde_json::from_slice;
 use warp::Filter;
 
 // Project crates.
@@ -49,57 +47,67 @@ pub async fn start_restful_api() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-// Test if the greeting route works correctly.
-//
-// This is the equivalent of:
-// `user@host: wget -qO- localhost:4242/hello/Eisenhorn`
-// `Hello, Eisenhorn`
-#[tokio::test]
-async fn test_greeting_route() {
-    let route_filter = greeting_route();
+#[cfg(test)]
+mod tests {
+    // External crates.
+    use serde_json::from_slice;
 
-    let api_response = warp::test::request()
-        .method("GET")
-        .path("/hello/Eisenhorn")
-        .reply(&route_filter)
-        .await;
-    assert_eq!(api_response.status(), 200);
-    assert_eq!(api_response.body(), "Hello, Eisenhorn!");
-}
+    // Project crates.
+    use crate::restful_api::greeting_route;
+    use crate::restful_api::reservation_route;
+    use crate::ReservationRequest;
+    // Test if the greeting route works correctly.
+    //
+    // This is the equivalent of:
+    // `user@host: wget -qO- localhost:4242/hello/Eisenhorn`
+    // `Hello, Eisenhorn`
+    #[tokio::test]
+    async fn test_greeting_route() {
+        let route_filter = greeting_route();
 
-// Test if the reservation route works correctly.
-//
-// This is the equivalent of:
-// `user@host: wget -qO- localhost:4242/hello/Eisenhorn`
-// `wget --method=POST -O- -q --body-data='{"start_time": 1707165008, "end_time": 1708374608, "capacity_amount": 64, "user_id": 42}' --header=Content-Type:application/json localhost:4242/reserve`
-// {"start_time":1707165008,"end_time":1708374608,"capacity_amount":64,"user_id":42}
-#[tokio::test]
-async fn test_reservation_route() {
-    let route_filter = reservation_route();
+        let api_response = warp::test::request()
+            .method("GET")
+            .path("/hello/Eisenhorn")
+            .reply(&route_filter)
+            .await;
+        assert_eq!(api_response.status(), 200);
+        assert_eq!(api_response.body(), "Hello, Eisenhorn!");
+    }
 
-    // Define JSON parameters for theoretical reservation REST request.
-    let test_reservation = ReservationRequest {
-        start_time: 1707165008,
-        end_time: 1708374608,
-        capacity_amount: 64,
-        user_id: 42,
-    };
+    // Test if the reservation route works correctly.
+    //
+    // This is the equivalent of:
+    // `user@host: wget -qO- localhost:4242/hello/Eisenhorn`
+    // `wget --method=POST -O- -q --body-data='{"start_time": 1707165008, "end_time": 1708374608, "capacity_amount": 64, "user_id": 42}' --header=Content-Type:application/json localhost:4242/reserve`
+    // {"start_time":1707165008,"end_time":1708374608,"capacity_amount":64,"user_id":42}
+    #[tokio::test]
+    async fn test_reservation_route() {
+        let route_filter = reservation_route();
 
-    let api_response = warp::test::request()
-        .path("/reserve")
-        // POST is required for sending RESTful (JSON) requests.
-        .method("POST")
-        // Serialize request body into JSON.
-        .json(&test_reservation)
-        .reply(&route_filter)
-        .await;
-    assert_eq!(api_response.status(), 200);
+        // Define JSON parameters for theoretical reservation REST request.
+        let test_reservation = ReservationRequest {
+            start_time: 1707165008,
+            end_time: 1708374608,
+            capacity_amount: 64,
+            user_id: 42,
+        };
 
-    let rest_response = api_response.body();
-    // Deserialize JSON from HTML body.
-    let jsonified_body: ReservationRequest = from_slice(rest_response).unwrap();
-    assert_eq!(jsonified_body.start_time, 1707165008);
-    assert_eq!(jsonified_body.end_time, 1708374608);
-    assert_eq!(jsonified_body.capacity_amount, 64);
-    assert_eq!(jsonified_body.user_id, 42);
+        let api_response = warp::test::request()
+            .path("/reserve")
+            // POST is required for sending RESTful (JSON) requests.
+            .method("POST")
+            // Serialize request body into JSON.
+            .json(&test_reservation)
+            .reply(&route_filter)
+            .await;
+        assert_eq!(api_response.status(), 200);
+
+        let rest_response = api_response.body();
+        // Deserialize JSON from HTML body.
+        let jsonified_body: ReservationRequest = from_slice(rest_response).unwrap();
+        assert_eq!(jsonified_body.start_time, 1707165008);
+        assert_eq!(jsonified_body.end_time, 1708374608);
+        assert_eq!(jsonified_body.capacity_amount, 64);
+        assert_eq!(jsonified_body.user_id, 42);
+    }
 }
