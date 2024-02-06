@@ -50,9 +50,6 @@ todo: write contributing section in `README.md`
     - [ ] initialize in `prelude.rs`
 - [x] RESTful API with some tests
     - [ ] param checking
-        - `start_time` before `end_time` and vice versa
-            - add test
-            - throw informative error
         - `start_time` and `end_time` are unix seconds
             - add test
             - throw informative error
@@ -86,11 +83,18 @@ todo: write contributing section in `README.md`
                 - capacity **is** available -> allocate (add to db); return success
                 - capacity **not** available -> return sorry
         - edge cases
-            - input checking
-                - `start_time` and `end_time` are in unix epoch format
-                    - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
-                - `start_time` after `end_time`
-                - `end_time` after `start_time`
+                - `start_time` before `end_time` and vice versa
+                    - add test
+                    - throw informative error
+                    - deets
+                        - `start_time` after `end_time`
+                        - `end_time` after `start_time`
+                - `start_time` and `end_time` are valid unix epoch examples
+                    - ex.
+                        - too many digits
+                        - too few digits
+                    - prompt source
+                        - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
                 - ? `amount` exceeds total capacity of cluster at zero utilization?
             - ? allocation edge cases?
                 - ensure 15% "float" capacity for "just-wanna-try-it" folks
