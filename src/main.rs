@@ -23,6 +23,7 @@ fn greeting_route() -> impl Filter<Extract = (String,), Error = warp::Rejection>
 async fn main() {
     let _ = setup_native_logging();
 
+    // Start RESTful API.
     warp::serve(greeting_route())
         .run(([127, 0, 0, 1], 4242))
         .await;
