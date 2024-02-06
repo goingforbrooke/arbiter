@@ -50,10 +50,11 @@ fn reservation_route() -> impl Filter<Extract = impl warp::Reply, Error = warp::
 async fn main() {
     let _ = setup_native_logging();
 
+    // Combine routes so we can feed them to the server enmass.
+    let all_routes = greeting_route().or(reservation_route());
+
     // Start RESTful API.
-    warp::serve(greeting_route())
-        .run(([127, 0, 0, 1], 4242))
-        .await;
+    warp::serve(all_routes).run(([127, 0, 0, 1], 4242)).await;
 
     info!("Done");
 }
