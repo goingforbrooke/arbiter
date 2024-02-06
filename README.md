@@ -1,5 +1,3 @@
-<img src="https://www.publicdomainpictures.net/pictures/170000/velka/judge-gavel-1461287273llp.jpg" align="right" />
-
 # 👩🏼‍⚖️ Arbiter
 
 Arbiter is a simple resource scheduler.
