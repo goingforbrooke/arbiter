@@ -45,49 +45,52 @@ todo: write contributing section in `README.md`
 
 ## 📐 Design Decisions
 
-- plan
-    - RESTful API with some tests
-        - `reserve(start_time, end_time, amount)`
-            - add `user_id` for BI/marketing teams benefit
-        - test client tests
-            - expected behavior
-                - ? consider different outcomes for `start_time`
-                    - starts immediately vs starts a week from now
-                        - now: account for spinup time?
-                        - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
-                - ... **within** timeframe fences
-                    - capacity **is** available -> allocate (add to db); return success
-                        - start time
-                            - now
-                                - allocate (add to db), return reservation complete and started. UID: 4242
-                            - not-now
-                                - allocate (add to db), return reservation complete. UID: 4242
-                    - capacity **not** available - return sorry
-                - ... **across** timeframe fences (need fx for combining inter-timeframe queries: "Create interfaces for the service to interact with the data store")
-                    - capacity **is** available -> allocate (add to db); return success
-                    - capacity **not** available - return sorry
-            - edge cases
-                - input checking
-                    - `start_time` and `end_time` are in unix epoch format
-                        - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
-                    - `start_time` after `end_time`
-                    - `end_tiem` after `start_time`
-                    - ? `amount` exceeds total capacity of cluster at zero utilization?
-                - ? allocation edge cases?
-                    - ensure 15% "float" capacity for "just-wanna-try-it" folks
-    - work out logic behind REST calls
-    - migrate file to SQL DB backing 
-    - future/nice-to-haves
-        - can't-do-but suggestions
-            - "negotiator" suggestions
-                - next timeframe that capacity is available
-                - less capacity during the same timeframe
-        - user ID tracking
-             - for
-                - BI folks: what should we include in the next datacenter that we build?
-                - marketing folks: what's selling
-                - SRE dashboard: is something busted in a weird way
-- known unknowns
+### Plan
+
+[ ] RESTful API with some tests
+    - `reserve(start_time, end_time, amount)`
+        - add `user_id` for BI/marketing teams benefit
+[ ] work out logic behind REST calls
+    - test client tests
+        - expected behavior
+            - ? consider different outcomes for `start_time`
+                - starts immediately vs starts a week from now
+                    - now: account for spinup time?
+                    - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
+            - ... **within** timeframe fences
+                - capacity **is** available -> allocate (add to db); return success
+                    - start time
+                        - now
+                            - allocate (add to db), return reservation complete and started. UID: 4242
+                        - not-now
+                            - allocate (add to db), return reservation complete. UID: 4242
+                - capacity **not** available - return sorry
+            - ... **across** timeframe fences (need fx for combining inter-timeframe queries: "Create interfaces for the service to interact with the data store")
+                - capacity **is** available -> allocate (add to db); return success
+                - capacity **not** available - return sorry
+        - edge cases
+            - input checking
+                - `start_time` and `end_time` are in unix epoch format
+                    - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
+                - `start_time` after `end_time`
+                - `end_tiem` after `start_time`
+                - ? `amount` exceeds total capacity of cluster at zero utilization?
+            - ? allocation edge cases?
+                - ensure 15% "float" capacity for "just-wanna-try-it" folks
+[ ] migrate file to SQL DB backing 
+
+### Future: nice-to-haves
+
+    - can't-do-but suggestions
+        - "negotiator" suggestions
+            - next timeframe that capacity is available
+            - less capacity during the same timeframe
+    - user ID tracking
+        - BI folks: what should we include in the next datacenter that we build?
+        - marketing folks: what's selling
+        - SRE dashboard: is something busted in a weird way
+
+### Known Unknowns
     - ~~total capacity == total capacity of hardware?~~
         - total cap == total hardware cap
     - ~~interval: live or batch?~~
