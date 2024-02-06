@@ -56,6 +56,9 @@ todo: write contributing section in `README.md`
         - `start_time` and `end_time` are unix seconds
             - add test
             - throw informative error
+        - other random parameters
+            - add test
+            - throw informative error
     - POST `reserve(start_time, end_time, capacity_amount, user_id)`
         - original: `reserve(start_time, end_time, amount)`
         - add `user_id` for BI/marketing teams benefit
