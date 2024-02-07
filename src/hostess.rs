@@ -75,7 +75,6 @@ mod tests {
     use crate::common::test_examples::schedule_one;
     use crate::common::test_examples::test_reservation_alpha;
     use crate::common::ReservationRequest;
-    use crate::logging::setup_native_logging;
 
     //
     // Corner Cases: Impossible requests that are more than malformed arguments (which would have
@@ -93,7 +92,6 @@ mod tests {
     // timeframe where it first becomes available.
     #[test]
     fn test_within_fences_with_capacity() {
-        let _ = setup_native_logging();
         let is_reservable =
             evaluate_reservation_request(test_reservation_alpha(), schedule_one()).unwrap();
         assert!(is_reservable);
@@ -102,7 +100,6 @@ mod tests {
     // Reservation request that fit neatly inside of a "schedule fence" with insufficient capacity.
     #[test]
     fn test_within_fences_no_capacity() {
-        let _ = setup_native_logging();
         // Exact match for slot, but exceeds total capacity by one.
         let too_big_reservation = ReservationRequest::new(1707165008, 1708374608, 65, 42);
         let is_reservable =
@@ -111,10 +108,34 @@ mod tests {
     }
 
     // Reservation request that crosses "schedule fences" that has capacity.
+    //
+    // This test crosses between the second and third reservations of Schedule One, but doesn't
+    // exceed available capacity.
+    // - `{1708374608, <start(left+42)> 1710793808, 96}`
+    // - `{1710793808, <end(right-42)> 1711398608, 32}`
     #[test]
-    fn test_outside_fences_with_capacity() {}
+    fn test_outside_fences_with_capacity() {
+        // Crosses schedule slots and within capacity.
+        let interloper_sufficient_capacity =
+            ReservationRequest::new(1708374650, 1711398566, 32, 42);
+        let is_reservable =
+            evaluate_reservation_request(interloper_sufficient_capacity, schedule_one()).unwrap();
+        assert!(is_reservable);
+    }
 
     // Reservation request that crosses "schedule fences" with insufficient capacity.
+    //
+    // This test crosses between the second and third reservations of Schedule One and
+    // exceeds available capacity of third reservation by one.
+    // - `{1708374608, <start(left+42)> 1710793808, 96}`
+    // - `{1710793808, <end(right-42)> 1711398608, 32}`
     #[test]
-    fn test_outside_fences_no_capacity() {}
+    fn test_outside_fences_no_capacity() {
+        // Crosses schedule slots and within capacity.
+        let interloper_insufficient_capacity =
+            ReservationRequest::new(1708374650, 1711398566, 33, 42);
+        let is_reservable =
+            evaluate_reservation_request(interloper_insufficient_capacity, schedule_one()).unwrap();
+        assert!(!is_reservable);
+    }
 }
