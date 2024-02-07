@@ -15,8 +15,7 @@ use logging::setup_native_logging;
 mod restful_api;
 use restful_api::start_restful_api;
 
-#[tokio::main]
-async fn main() {
+fn main() {
     let _ = setup_native_logging();
 
     let _ = start_restful_api();
