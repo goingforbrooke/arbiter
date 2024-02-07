@@ -116,7 +116,6 @@ Reservation requests must start and end within the provided schedule. While the 
         - plan 
             - write to-fail API tests
                 - negative `start_time`
-                - 
             - disallow all negative submissions to RESTful API with change from `i64` to ?`u32`
                 - allow for reservations up to 100 years in the future
 - [x] Only allow start times if `now()` or in the future
@@ -146,6 +145,7 @@ Reservation requests must start and end within the provided schedule. While the 
                 - `{1707165008, 1708374608, 64}`
                 - start, end, capacity
 - [ ] remaining todos
+    - [ ] update rez eval tests to uses assess instead of eval
 	- [ ] add test for process rez fx
 		- chain: manual check data written to table
 	- [ ] clear tables between tests
