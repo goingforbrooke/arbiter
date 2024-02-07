@@ -27,9 +27,34 @@ pub fn initialize_database() -> Result<Client> {
     Ok(db_client)
 }
 
+///// Get mocked capacity schedule from testing function.
+//pub fn get_schedule() -> Result<CapacitySchedule> {
+//    let schedule = schedule_one();
+//    Ok(schedule)
+//}
+
+/// Get capacity schedule from Database.
 pub fn get_schedule() -> Result<CapacitySchedule> {
-    let schedule = schedule_one();
-    Ok(schedule)
+    let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+    let mut capacities = Vec::new();
+    for query_row in db_client.query(
+        "SELECT id, start_time, end_time, capacity_amount, user_id FROM capacity_schedule",
+        &[],
+    )? {
+        // todo: Disregard id.
+        let _id: i32 = query_row.get(0);
+        let start_time: u32 = query_row.get(1);
+        let end_time: u32 = query_row.get(2);
+        let capacity_amount: u32 = query_row.get(3);
+        let user_id: u32 = query_row.get(4);
+        let existing_reservation =
+            ReservationRequest::new(start_time, end_time, capacity_amount, user_id);
+        capacities.push(existing_reservation)
+    }
+    let queried_schedule = CapacitySchedule {
+        reservations: capacities,
+    };
+    Ok(queried_schedule)
 }
 
 fn create_schedule_tables(db_client: &mut Client) -> Result<()> {
