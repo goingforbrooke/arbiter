@@ -100,7 +100,7 @@ Reservation requests must start and end within the provided schedule. While the 
                     - prompt source
                         - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
                 - ~~? `amount` exceeds total capacity of cluster at zero utilization?~~
-- [ ] wire up evaluator and RESTful API
+- [x] wire up evaluator and RESTful API
 - missing
     - **Times are in unix epoch format. Implement appropriate errors for impossible requests.**
         - [ ] ? convert to unixtime object ASAP instead of `int`
