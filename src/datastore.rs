@@ -8,6 +8,12 @@ use crate::ReservationRequest;
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
 
+/// Initialize Arbiter's database.
+///
+/// Warning: If PostgreSQL was in stalled with Homebrew, then the "postgres" role needs to be added
+/// before this will work. Without it, `Client::connect()` will hang forever.
+/// `user@host: /opt/homebrew/opt/postgresql@14/bin/createuser -s postgres`
+/// credit: https://stackoverflow.com/questions/15301826/psql-fatal-role-postgres-does-not-exist#comment91332745_15309551
 pub fn initialize_database() -> Result<Client> {
     info!("Initializing database");
     // Clean old data.
