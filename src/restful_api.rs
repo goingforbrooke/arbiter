@@ -114,7 +114,6 @@ mod tests {
     // Test if the reservation route works correctly.
     //
     // This is the equivalent of:
-    // `user@host: wget -qO- localhost:4242/hello/Eisenhorn`
     // `wget --method=POST -O- -q --body-data='{"start_time": 1707165008, "end_time": 1708374608, "capacity_amount": 64, "user_id": 42}' --header=Content-Type:application/json localhost:4242/reserve`
     // {"start_time":1707165008,"end_time":1708374608,"capacity_amount":64,"user_id":42}
     #[tokio::test]
