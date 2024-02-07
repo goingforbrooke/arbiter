@@ -96,6 +96,7 @@ fn evaluate_reservation_request(
     // Find most limiting resource capacity among existing reservations during request timeframe
     let capacity_ceiling: &u32 = match reservation_capacities.iter().min() {
         Some(min_found) => min_found,
+        // Throw a runtime error if no limiting factors were found b/c impossible inside schedule.
         None => return Err(anyhow!("No applicable reservation capacities were found.")),
     };
     debug!("Limiting factor: {}", capacity_ceiling);
