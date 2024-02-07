@@ -1,29 +1,68 @@
 // External crates.
 use anyhow::Result;
+use postgres::{Client, NoTls};
 
 // Project crates.
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
+#[allow(unused)]
+use log::{debug, error, info, trace, warn};
+
+pub fn initialize_database() -> Result<Client> {
+    // Clean old data.
+    // SWEEP
+    let db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+    // Ensure tables exists.
+    let _ = create_schedule_tables();
+    // Populate tables with dummy data.
+    let _ = populate_schedule_tables();
+    Ok(db_client)
+}
 
 pub fn get_schedule() -> Result<CapacitySchedule> {
     let schedule = schedule_one();
     Ok(schedule)
 }
 
-// Get Capacity Schedule One from the database.
-//fn get_schedule_one() {}
-//
-//// Get Capacity Schedule Two from the database.
-//fn get_schedule_two() {}
-//
-//fn populate_schedule_tables() {
-//    let schedule_one = get_schedule_one();
-//    let schedule_two = get_schedule_two();
-//}
-//
-pub fn initialize_database() -> Result<()> {
-    //populate_schedule_tables();
-    //database_connection
+fn create_schedule_tables() -> Result<()> {
+    let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+    let table_title = "capacity_schedule";
+    let creation_cmd = format!(
+        "CREATE TABLE {} (
+           id                 SERIAL PRIMARY KEY,
+           start_time         INTEGER NOT NULL,
+           end_time           INTEGER NOT NULL,
+           capacity_amount    INTEGER NOT NULL,
+           user_id            INTEGER NOT NULL
+        )",
+        table_title
+    );
+    let _ = db_client.batch_execute(&creation_cmd);
+    info!("Created DB Table: \"{}\"", table_title);
+    Ok(())
+}
+
+fn populate_schedule_row(existing_reservation: ReservationRequest, table_name: &str) -> Result<()> {
+    let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+    let insertion_command = format!(
+        "INSERT INTO {} \
+                     (start_time, end_time, capacity_amount, user_id) \
+                     VALUES ({}, {}, {}, {})",
+        table_name,
+        existing_reservation.start_time,
+        existing_reservation.end_time,
+        existing_reservation.capacity_amount,
+        existing_reservation.user_id
+    );
+    let _ = db_client.batch_execute(&insertion_command);
+    Ok(())
+}
+
+fn populate_schedule_tables() -> Result<()> {
+    for existing_reservation in schedule_one().reservations {
+        populate_schedule_row(existing_reservation, "capacity_schedule")?;
+    }
+    //for existing_reservation in schedule_two()
     Ok(())
 }
 
