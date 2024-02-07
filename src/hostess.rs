@@ -207,7 +207,7 @@ mod tests {
     use log::{debug, error, info, trace, warn};
 
     // Project crates.
-    use super::evaluate_reservation_request;
+    use super::process_reservation;
     use crate::common::test_examples::test_reservation_alpha;
     use crate::common::ReservationRequest;
     use crate::datastore::test_examples::schedule_one;
@@ -222,8 +222,7 @@ mod tests {
     fn test_reject_impossible_timeframe() {
         // First reservation of schedule one with swapped start and end times.
         let impossible_time_reservation = ReservationRequest::new(1708374608, 1707165008, 65, 42);
-        let is_reservable =
-            evaluate_reservation_request(&impossible_time_reservation, &schedule_one());
+        let is_reservable = process_reservation(&impossible_time_reservation);
         assert!(is_reservable.is_err());
     }
 
@@ -232,7 +231,7 @@ mod tests {
     fn test_reject_before_schedule_scope() {
         // First reservation of schedule One that starts 42 seconds earlier.
         let too_early_reservation = ReservationRequest::new(1707164966, 1708374608, 64, 42);
-        let is_reservable = evaluate_reservation_request(&too_early_reservation, &schedule_one());
+        let is_reservable = process_reservation(&too_early_reservation);
         assert!(is_reservable.is_err());
     }
 
@@ -241,7 +240,7 @@ mod tests {
     fn test_reject_after_schedule_scope() {
         // Last reservation of schedule One that ends 42 seconds later.
         let too_late_reservation = ReservationRequest::new(1711398608, 1713213050, 64, 42);
-        let is_reservable = evaluate_reservation_request(&too_late_reservation, &schedule_one());
+        let is_reservable = process_reservation(&too_late_reservation);
         assert!(is_reservable.is_err());
     }
 
@@ -256,8 +255,7 @@ mod tests {
     // timeframe where it first becomes available.
     #[test]
     fn test_within_fences_with_capacity() {
-        let is_reservable =
-            evaluate_reservation_request(&test_reservation_alpha(), &schedule_one()).unwrap();
+        let is_reservable = process_reservation(&test_reservation_alpha()).unwrap();
         assert!(is_reservable);
     }
 
@@ -266,8 +264,7 @@ mod tests {
     fn test_within_fences_no_capacity() {
         // Exact match for slot, but exceeds total capacity by one.
         let too_big_reservation = ReservationRequest::new(1707165008, 1708374608, 65, 42);
-        let is_reservable =
-            evaluate_reservation_request(&too_big_reservation, &schedule_one()).unwrap();
+        let is_reservable = process_reservation(&too_big_reservation).unwrap();
         assert!(!is_reservable);
     }
 
@@ -282,8 +279,7 @@ mod tests {
         // Crosses schedule slots and within capacity.
         let interloper_sufficient_capacity =
             ReservationRequest::new(1708374650, 1711398566, 32, 42);
-        let is_reservable =
-            evaluate_reservation_request(&interloper_sufficient_capacity, &schedule_one()).unwrap();
+        let is_reservable = process_reservation(&interloper_sufficient_capacity).unwrap();
         assert!(is_reservable);
     }
 
@@ -298,9 +294,7 @@ mod tests {
         // Crosses schedule slots and within capacity.
         let interloper_insufficient_capacity =
             ReservationRequest::new(1708374650, 1711398566, 33, 42);
-        let is_reservable =
-            evaluate_reservation_request(&interloper_insufficient_capacity, &schedule_one())
-                .unwrap();
+        let is_reservable = process_reservation(&interloper_insufficient_capacity).unwrap();
         assert!(!is_reservable);
     }
 }
