@@ -98,6 +98,8 @@ pub mod test_examples {
     ///    - `{1709584208, 1712003408, 100}`
     ///    - `{1712003408, 1712608208, 20}`
     ///    - `{1712608208, 1714422608, 60}`
+    ///
+    #[allow(unused)]
     pub fn schedule_two() -> CapacitySchedule {
         CapacitySchedule {
             // Assume that `user_id` "88" is on-site maintenance team.

@@ -67,6 +67,7 @@ fn evaluate_reservation_request(
 #[cfg(test)]
 mod tests {
     // Standard library crates.
+    #[allow(unused)]
     use log::{debug, error, info, trace, warn};
 
     // Project crates.
@@ -93,7 +94,6 @@ mod tests {
     fn test_within_fences_with_capacity() {
         let _ = setup_native_logging();
         // Reservation request that exactly matches available timeframe and capacity.
-        let test_reservation = test_reservation_alpha();
         let is_reservable =
             evaluate_reservation_request(test_reservation_alpha(), schedule_one()).unwrap();
         assert!(is_reservable);
