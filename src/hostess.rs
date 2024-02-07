@@ -29,6 +29,28 @@ fn evaluate_reservation_request(
     );
     debug!("Evaluating reservation request: {}", reservation_request);
 
+    ///// Ensure the request is within Arbiter's purview (the schedule range).
+    //let earliest_start = capacity_schedule
+    //    .reservations
+    //    .iter()
+    //    .max_by_key(|existing_reservation| existing_reservation.start_time)
+    //    .unwrap()
+    //    .start_time;
+    //debug!(
+    //    "Earliest scheduled reservation starts at {}",
+    //    earliest_start
+    //);
+    //let latest_stop = capacity_schedule
+    //    .reservations
+    //    .iter()
+    //    .min_by_key(|existing_reservation| existing_reservation.end_time)
+    //    .unwrap()
+    //    .end_time;
+    //debug!("Latest scheduled reservation stop at {}", latest_stop);
+    //if reservation_request.start_time < earliest_start:
+    //
+    //if reservation_request.end_time > latest_stop:
+
     // Track the total capacity for each timeframe-compatible reservation.
     let mut reservation_capacities: Vec<u32> = Vec::new();
 
