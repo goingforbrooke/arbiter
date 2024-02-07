@@ -100,14 +100,27 @@ Reservation requests must start and end within the provided schedule. While the 
                     - prompt source
                         - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
                 - ~~? `amount` exceeds total capacity of cluster at zero utilization?~~
-- [ ] attach evaluator to RESTful API
-- [ ] ? convert to unixtime object ASAP instead of `int`
-- [ ] `now()` is `start_time`
+- [ ] wire up evaluator and RESTful API
+- missing
+    - **Times are in unix epoch format. Implement appropriate errors for impossible requests.**
+        - [ ] ? convert to unixtime object ASAP instead of `int`
+        - [ ] ? `start_time` and `end_time` are unix seconds
+            - add test
+            - throw informative error
+        - [ ] random parameters that we didn't ask for (ex. `"emojis": "lol"`)
+            - add test
+            - throw informative error
+- [ ] Specific scheduling errors and handling
+    - **Implement scheduling and error handling for non-viable requests.**
+- [ ] option for `now` in `start_time`
     - **? consider different outcomes for `start_time`**
         - starts immediately vs starts a week from now
             - now: account for spinup time?
-            - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
+            - ? Assume that everything reserved at least 30 mins ahead of time is already spun up?
 - [ ] migrate ~~file~~ struct to SQL DB backing
+    - **Select an appropriate data store.**
+        - **Decide how to represent the data. Be prepared to explain your thinking about the data store and the representation you chose.**
+        - **Create interfaces for the service to interact with the data store.**
     - tables
         - user requests
             - user_id, start, end, denied/allowed (bool)
