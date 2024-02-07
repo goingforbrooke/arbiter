@@ -4,13 +4,27 @@ use std::error::Error;
 // External crates.
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
+use serde_derive::{Deserialize, Serialize};
 use warp::Filter;
 
 // Project crates.
 use crate::datastore::get_schedule;
 use crate::hostess::evaluate_reservation_request;
-use crate::CapacitySchedule;
 use crate::ReservationRequest;
+
+/// RESTful API JSON response concerning reservation attempt.
+#[derive(Deserialize, Serialize)]
+struct ReservationAttemptResponse {
+    is_reserved: bool,
+    // todo: Add unique IDs to reservations.
+    // "reservation_id": u32
+}
+
+impl ReservationAttemptResponse {
+    fn new(is_reserved: bool) -> Self {
+        Self { is_reserved }
+    }
+}
 
 // Greet the user by name.
 //
@@ -30,7 +44,6 @@ fn greeting_route() -> impl Filter<Extract = (String,), Error = warp::Rejection>
 // - `capacity_amount`: Amount of resource you'd like to have allocated.
 // - `user_id`: Your unique identifier.
 fn reservation_route() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Copy {
-    //let capacity_schedule: CapacitySchedule = ;
     info!("Received reservation request");
     warp::path!("reserve")
         // Only POST requests can ferry JSON bodies (*usually*).
@@ -40,7 +53,8 @@ fn reservation_route() -> impl Filter<Extract = impl warp::Reply, Error = warp::
         .map(|reservation_request: ReservationRequest| {
             let is_reserved: bool =
                 evaluate_reservation_request(reservation_request, get_schedule().unwrap()).unwrap();
-            warp::reply::json(&is_reserved)
+            let json_response = ReservationAttemptResponse::new(is_reserved);
+            warp::reply::json(&json_response)
         })
     //.map(|data: ReservationRequest| warp::reply::json(&data))
 }
