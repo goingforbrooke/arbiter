@@ -6,7 +6,7 @@ use log::{debug, error, info, trace, warn};
 
 // Project modules
 mod common;
-// Make reservation abstracitons available everywhere via re-export b/c used often.
+// Make reservation abstractions available everywhere via re-export b/c used often.
 pub use common::CapacitySchedule;
 pub use common::ReservationRequest;
 mod hostess;
