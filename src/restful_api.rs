@@ -86,6 +86,7 @@ mod tests {
     use serde_json::from_slice;
 
     // Project crates.
+    use super::ReservationResponse;
     use crate::common::test_examples::test_reservation_alpha;
     use crate::logging::setup_native_logging;
     use crate::restful_api::greeting_route;
@@ -122,14 +123,12 @@ mod tests {
         let route_filter = reservation_route();
 
         // Define JSON parameters for theoretical reservation REST request.
-        //1707165008, 1708374608, 64, 42
         let test_reservation = test_reservation_alpha();
 
         let api_response = warp::test::request()
             .path("/reserve")
             // POST is required for sending RESTful (JSON) requests.
             .method("POST")
-            // Serialize request body into JSON.
             .json(&test_reservation)
             .reply(&route_filter)
             .await;
@@ -137,10 +136,8 @@ mod tests {
 
         let rest_response = api_response.body();
         // Deserialize JSON from HTML body.
-        let jsonified_body: ReservationRequest = from_slice(rest_response).unwrap();
-        assert_eq!(jsonified_body.start_time, 1707165008);
-        assert_eq!(jsonified_body.end_time, 1708374608);
-        assert_eq!(jsonified_body.capacity_amount, 64);
-        assert_eq!(jsonified_body.user_id, 42);
+        let jsonified_body: ReservationResponse = from_slice(rest_response).unwrap();
+        assert_eq!(jsonified_body.is_reserved, true);
+        assert_eq!(jsonified_body.user_message, "reservation created");
     }
 }
