@@ -21,6 +21,7 @@ pub fn process_reservation(reservation_request: &ReservationRequest) -> Result<b
 /// Ensure that reservation begin time is in the future.
 ///
 /// No one has a time machine for using caapacity reseved in the past.
+#[allow(unused)]
 fn starts_in_future(start_time: u32) -> Result<()> {
     let system_now = SystemTime::now();
     let time_since_epoch: Duration = system_now.duration_since(UNIX_EPOCH).unwrap();
