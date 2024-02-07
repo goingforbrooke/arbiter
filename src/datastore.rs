@@ -50,13 +50,16 @@ pub fn get_schedule() -> Result<CapacitySchedule> {
         &[],
     )? {
         // todo: Disregard id.
-        let _id: i32 = query_row.get(0);
-        let start_time: u32 = query_row.get(1);
-        let end_time: u32 = query_row.get(2);
-        let capacity_amount: u32 = query_row.get(3);
-        let user_id: u32 = query_row.get(4);
-        let existing_reservation =
-            ReservationRequest::new(start_time, end_time, capacity_amount, user_id);
+        let start_time: i32 = query_row.get(1);
+        let end_time: i32 = query_row.get(2);
+        let capacity_amount: i32 = query_row.get(3);
+        let user_id: i32 = query_row.get(4);
+        let existing_reservation = ReservationRequest::new(
+            start_time as u32,
+            end_time as u32,
+            capacity_amount as u32,
+            user_id as u32,
+        );
         capacities.push(existing_reservation)
     }
     let queried_schedule = CapacitySchedule {
@@ -75,10 +78,10 @@ pub fn add_user_reservation(new_reservation: &ReservationRequest) -> Result<()> 
                       (start_time, end_time, reservation_amount, user_id) 
                       VALUES ($1, $2, $3, $4)",
         &[
-            &new_reservation.start_time,
-            &new_reservation.end_time,
-            &new_reservation.capacity_amount,
-            &new_reservation.user_id,
+            &(new_reservation.start_time as i32),
+            &(new_reservation.end_time as i32),
+            &(new_reservation.capacity_amount as i32),
+            &(new_reservation.user_id as i32),
         ],
     )?;
     info!("Added reservation to DB");
@@ -94,13 +97,16 @@ pub fn get_user_reservation_schedule() -> Result<CapacitySchedule> {
         &[],
     )? {
         // todo: Disregard id.
-        let _id: i32 = query_row.get(0);
-        let start_time: u32 = query_row.get(1);
-        let end_time: u32 = query_row.get(2);
-        let reservation_amount: u32 = query_row.get(3);
-        let user_id: u32 = query_row.get(4);
-        let user_reservations =
-            ReservationRequest::new(start_time, end_time, reservation_amount, user_id);
+        let start_time: i32 = query_row.get(1);
+        let end_time: i32 = query_row.get(2);
+        let reservation_amount: i32 = query_row.get(3);
+        let user_id: i32 = query_row.get(4);
+        let user_reservations = ReservationRequest::new(
+            start_time as u32,
+            end_time as u32,
+            reservation_amount as u32,
+            user_id as u32,
+        );
         capacities.push(user_reservations)
     }
     let queried_schedule = CapacitySchedule {
@@ -146,10 +152,10 @@ fn populate_schedule_row(
                      (start_time, end_time, capacity_amount, user_id) \
                      VALUES ({}, {}, {}, {})",
         table_name,
-        existing_reservation.start_time,
-        existing_reservation.end_time,
-        existing_reservation.capacity_amount,
-        existing_reservation.user_id
+        existing_reservation.start_time as i32,
+        existing_reservation.end_time as i32,
+        existing_reservation.capacity_amount as i32,
+        existing_reservation.user_id as i32
     );
     let _ = db_client.batch_execute(&insertion_command);
     Ok(())
