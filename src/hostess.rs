@@ -27,64 +27,20 @@ fn evaluate_reservation_request(
         !capacity_schedule.reservations.is_empty(),
         "Given Capacity Schedule has no reservations."
     );
-    debug!("Evaluating reservation request: {}", reservation_request);
-
-    ///// Ensure the request is within Arbiter's purview (the schedule range).
-    //let earliest_start = capacity_schedule
-    //    .reservations
-    //    .iter()
-    //    .max_by_key(|existing_reservation| existing_reservation.start_time)
-    //    .unwrap()
-    //    .start_time;
-    //debug!(
-    //    "Earliest scheduled reservation starts at {}",
-    //    earliest_start
-    //);
-    //let latest_stop = capacity_schedule
-    //    .reservations
-    //    .iter()
-    //    .min_by_key(|existing_reservation| existing_reservation.end_time)
-    //    .unwrap()
-    //    .end_time;
-    //debug!("Latest scheduled reservation stop at {}", latest_stop);
-    //if reservation_request.start_time < earliest_start:
-    //
-    //if reservation_request.end_time > latest_stop:
-
+    debug!("Evaluating {}", reservation_request);
     // Track the total capacity for each timeframe-compatible reservation.
     let mut reservation_capacities: Vec<u32> = Vec::new();
 
-    // todo: Evaluate existing reservations in reverse (newest-to-oldest) so there's fewer to go through.
+    // Find where the request's period overlaps with existing reservations.
     for existing_reservation in capacity_schedule.reservations.iter() {
-        debug!(
-            "Evaluating capacity against existing reservation: {}",
-            existing_reservation
-        );
-
-        let starts_during: bool = reservation_request.start_time >= existing_reservation.start_time;
-        let ends_during: bool = reservation_request.end_time <= existing_reservation.end_time;
-
-        if starts_during || ends_during {
+        let starts_during: bool = reservation_request.start_time < existing_reservation.end_time;
+        let ends_during: bool = reservation_request.end_time > existing_reservation.start_time;
+        // If requested timeframe overlaps with an existing reservation...
+        if starts_during && ends_during {
+            debug!("Found overlap with existing {}", existing_reservation);
+            // todo: ... find how much they overlap so we can suggest right/left alternative timeframes later.
             reservation_capacities.push(existing_reservation.capacity_amount);
         }
-
-        //// If requested timeframe starts during an existing reservation...
-        //if starts_during {
-        //    debug!(
-        //        "Found that capacity request period starts during existing reservation timeframe. {} overlaps with {}",
-        //        existing_reservation, reservation_request
-        //    );
-        //}
-
-        //// If requested timeframe ends during an existing reservation...
-        //if ends_during {
-        //    debug!(
-        //        "Found that capacity request period ends during existing reservation timeframe. {} overlaps with {}",
-        //        existing_reservation, reservation_request
-        //    );
-        //    // ... then note concurrent reservation's capacity as a possible limiting factor.
-        //    reservation_capacities.push(existing_reservation.capacity_amount);
-        //}
     }
     debug!("Competing reservation usages: {:?}", reservation_capacities);
 

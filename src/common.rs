@@ -46,8 +46,10 @@ impl fmt::Display for ReservationRequest {
     fn fmt(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
         write!(
             formatter,
-            "start_time: {}, end_time: {}, capacity_amount: {}, user_id: {}",
-            self.start_time, self.end_time, self.capacity_amount, self.user_id
+            "reservation request from user ID \"{}\" \
+            for \"{}\" of capacity \
+            from \"{}\" to \"{}\"",
+            self.user_id, self.capacity_amount, self.start_time, self.end_time
         )
     }
 }
