@@ -43,8 +43,7 @@ pub async fn start_restful_api() -> Result<(), Box<dyn Error>> {
 
     // Start RESTful API.
     info!("Initializing RESTful API");
-    warp::serve(all_routes).run(([127, 0, 0, 1], 4242)).await;
-    Ok(())
+    Ok(warp::serve(all_routes).run(([127, 0, 0, 1], 4242)).await)
 }
 
 #[cfg(test)]
