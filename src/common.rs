@@ -15,9 +15,11 @@ use serde_derive::{Deserialize, Serialize};
 /// retrieval. It can represent a request for a portion of a resource or a portion that's already
 /// been allocated.
 #[derive(Deserialize, Serialize)]
+// Reject unknown REST JSON params with descriptive message.
+#[serde(deny_unknown_fields)]
 pub struct ReservationRequest {
-    pub start_time: i64,
-    pub end_time: i64,
+    pub start_time: u32,
+    pub end_time: u32,
     pub capacity_amount: u32,
     pub user_id: u32,
 }
@@ -31,7 +33,7 @@ impl ReservationRequest {
     /// - `end_time`: Reservation end time, represented by Unix epoch format.
     /// - `capacity_amount`: Amount of resource the user would like to have allocated.
     /// - `user_id`: Your unique identifier.
-    pub fn new(start_time: i64, end_time: i64, capacity_amount: u32, user_id: u32) -> Self {
+    pub fn new(start_time: u32, end_time: u32, capacity_amount: u32, user_id: u32) -> Self {
         Self {
             start_time,
             end_time,

@@ -139,4 +139,7 @@ mod tests {
         assert_eq!(jsonified_body.is_reserved, true);
         assert_eq!(jsonified_body.user_message, "reservation created");
     }
+    // Future: Test that requests with unknown fields are rejected by serde's unknown fields
+    // rejection.
+    // wget --method=POST -O- -q --body-data='{"start_time": 1707165008, "end_time": 1708374608, "capacity_amount": 64, "user_id": 42, "memes": "lol"}' --header=Content-Type:application/json localhost:4242/reserve
 }

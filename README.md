@@ -57,7 +57,7 @@ Reservation requests must start and end within the provided schedule. While the 
         - [ ] ? `start_time` and `end_time` are unix seconds
             - add test
             - throw informative error
-        - [ ] random parameters that we didn't ask for (ex. `"emojis": "lol"`)
+        - [x] random parameters that we didn't ask for (ex. `"emojis": "lol"`)
             - add test
             - throw informative error
     - [x] POST `reserve(start_time, end_time, capacity_amount, user_id)`
@@ -101,19 +101,36 @@ Reservation requests must start and end within the provided schedule. While the 
                         - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
                 - ~~? `amount` exceeds total capacity of cluster at zero utilization?~~
 - [x] wire up evaluator and RESTful API
-- missing
+- [x] **Times are in unix epoch format. Implement appropriate errors for impossible requests.**
+    -  ? convert to unixtime object ASAP instead of `int`
+    -  ? `start_time` and `end_time` are unix seconds
+        - add test
+        - throw informative error
     - hmmm
-        - ? disallow negative period start or end (never going to reserve to 1970)
+        - ? disallow negative period start or end (never going to reserve before 1970)
+        - Since there's no maximum or minimum number of seconds before or after Jan 1, 1970, could we'll accept everything from Jan 1, 1870  to 100 years from now
         - start times before now()
             - allow historical?
-        - messy args to REST API: str instead of int
-    - **Times are in unix epoch format. Implement appropriate errors for impossible requests.**
-        - [ ] ? convert to unixtime object ASAP instead of `int`
-        - [ ] ? `start_time` and `end_time` are unix seconds
-            - add test
-            - throw informative error
-- [ ] Specific scheduling errors and handling
+                - decision: 
+                    - **no b/c no one wants to reserve history**
+        - plan 
+            - write to-fail API tests
+                - negative `start_time`
+                - 
+            - disallow all negative submissions to RESTful API with change from `i64` to ?`u32`
+                - allow for reservations up to 100 years in the future
+- [x] Only allow start times if `now()` or in the future
+    - add `ensure` check to rezzy eval to see if `start_time` happens after `now()`
+        - error "can't be in the past"
+    - error implemented here b/c scheduler's server time is more precious than REST API's time
+        - used to decide `now()`
+- [ ] ? Return more specific REST API scheduling errors and handling
     - **Implement scheduling and error handling for non-viable requests.**
+    - [ ] non-viable requests
+    - types
+        - [x] bad REST arg
+        - [x] bad arg to eval fx
+        - reservation not possible
 - [ ] migrate ~~file~~ struct to SQL DB backing
     - **Select an appropriate data store.**
         - **Decide how to represent the data. Be prepared to explain your thinking about the data store and the representation you chose.**
@@ -128,7 +145,7 @@ Reservation requests must start and end within the provided schedule. While the 
             - cluster capacity
                 - `{1707165008, 1708374608, 64}`
                 - start, end, capacity
-- [ ] option for `now` in `start_time`
+- [ ] ? option for `now` in `start_time`
     - **? consider different outcomes for `start_time`**
         - starts immediately vs starts a week from now
             - now: account for spinup time?
