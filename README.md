@@ -87,7 +87,7 @@ Reservation requests must start and end within the provided schedule. While the 
                 - capacity **is** available -> allocate (add to db); return success
                 - capacity **not** available -> return sorry
         - edge cases
-                - [ ] outside of schedule timeframe
+                - [x] outside of schedule timeframe
                     - assume the worst: no capacity available
                         - default to zero
                         - error message: while resource may be available for the period you gave, it's outside of Arbiter's purview. Please choose a timeframe between {schedule_max} and {schedule_min}
