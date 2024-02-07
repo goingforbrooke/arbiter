@@ -63,7 +63,7 @@ Reservation requests must start and end within the provided schedule. While the 
     - [x] POST `reserve(start_time, end_time, capacity_amount, user_id)`
         - original: `reserve(start_time, end_time, amount)`
         - add `user_id` for BI/marketing teams benefit
-- [ ] work out logic behind REST calls
+- [x] work out logic behind REST calls
     - test client tests
         - expected behavior
             - other stuff
@@ -100,14 +100,24 @@ Reservation requests must start and end within the provided schedule. While the 
                     - prompt source
                         - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
                 - ~~? `amount` exceeds total capacity of cluster at zero utilization?~~
-- [ ] attach evaluator to RESTful API
-- [ ] ? convert to unixtime object ASAP instead of `int`
-- [ ] `now()` is `start_time`
-    - **? consider different outcomes for `start_time`**
-        - starts immediately vs starts a week from now
-            - now: account for spinup time?
-            - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
+- [x] wire up evaluator and RESTful API
+- missing
+    - hmmm
+        - ? disallow negative period start or end (never going to reserve to 1970)
+        - start times before now()
+            - allow historical?
+        - messy args to REST API: str instead of int
+    - **Times are in unix epoch format. Implement appropriate errors for impossible requests.**
+        - [ ] ? convert to unixtime object ASAP instead of `int`
+        - [ ] ? `start_time` and `end_time` are unix seconds
+            - add test
+            - throw informative error
+- [ ] Specific scheduling errors and handling
+    - **Implement scheduling and error handling for non-viable requests.**
 - [ ] migrate ~~file~~ struct to SQL DB backing
+    - **Select an appropriate data store.**
+        - **Decide how to represent the data. Be prepared to explain your thinking about the data store and the representation you chose.**
+        - **Create interfaces for the service to interact with the data store.**
     - tables
         - user requests
             - user_id, start, end, denied/allowed (bool)
@@ -118,6 +128,11 @@ Reservation requests must start and end within the provided schedule. While the 
             - cluster capacity
                 - `{1707165008, 1708374608, 64}`
                 - start, end, capacity
+- [ ] option for `now` in `start_time`
+    - **? consider different outcomes for `start_time`**
+        - starts immediately vs starts a week from now
+            - now: account for spinup time?
+            - ? Assume that everything reserved at least 30 mins ahead of time is already spun up?
 
 ### Future: nice-to-haves
 

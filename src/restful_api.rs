@@ -4,10 +4,30 @@ use std::error::Error;
 // External crates.
 #[allow(unused)]
 use log::{debug, error, info, trace, warn};
+use serde_derive::{Deserialize, Serialize};
 use warp::Filter;
 
 // Project crates.
+use crate::hostess::process_reservation;
 use crate::ReservationRequest;
+
+/// RESTful API JSON response concerning reservation attempt.
+#[derive(Deserialize, Serialize)]
+struct ReservationResponse {
+    is_reserved: bool,
+    user_message: String,
+    // todo: Add unique IDs to reservations.
+    // "reservation_id": u32
+}
+
+impl ReservationResponse {
+    fn new(is_reserved: bool, user_message: String) -> Self {
+        Self {
+            is_reserved,
+            user_message,
+        }
+    }
+}
 
 // Greet the user by name.
 //
@@ -27,13 +47,27 @@ fn greeting_route() -> impl Filter<Extract = (String,), Error = warp::Rejection>
 // - `capacity_amount`: Amount of resource you'd like to have allocated.
 // - `user_id`: Your unique identifier.
 fn reservation_route() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Copy {
+    info!("Received reservation request");
     warp::path!("reserve")
         // Only POST requests can ferry JSON bodies (*usually*).
         .and(warp::post())
         // Expect JSON body format to follow our definition.
-        //.and(warp::body::json::<ReservationRequest>())
-        .and(warp::body::json())
-        .map(|data: ReservationRequest| warp::reply::json(&data))
+        .and(warp::body::json::<ReservationRequest>())
+        .map(|reservation_request: ReservationRequest| {
+            // Check if the
+            let json_response = match process_reservation(&reservation_request) {
+                Ok(is_reserved) => {
+                    let evaluation_message = match is_reserved {
+                        true => String::from("reservation created"),
+                        false => String::from("reservation not created"),
+                    };
+                    ReservationResponse::new(is_reserved, evaluation_message)
+                }
+                Err(error_message) => ReservationResponse::new(false, error_message.to_string()),
+            };
+            warp::reply::json(&json_response)
+        })
+    //.map(|data: ReservationRequest| warp::reply::json(&data))
 }
 
 #[tokio::main]
@@ -52,7 +86,9 @@ mod tests {
     use serde_json::from_slice;
 
     // Project crates.
+    use super::ReservationResponse;
     use crate::common::test_examples::test_reservation_alpha;
+    use crate::logging::setup_native_logging;
     use crate::restful_api::greeting_route;
     use crate::restful_api::reservation_route;
     use crate::ReservationRequest;
@@ -63,6 +99,7 @@ mod tests {
     // `Hello, Eisenhorn`
     #[tokio::test]
     async fn test_greeting_route() {
+        let _ = setup_native_logging();
         let route_filter = greeting_route();
 
         let api_response = warp::test::request()
@@ -77,22 +114,20 @@ mod tests {
     // Test if the reservation route works correctly.
     //
     // This is the equivalent of:
-    // `user@host: wget -qO- localhost:4242/hello/Eisenhorn`
     // `wget --method=POST -O- -q --body-data='{"start_time": 1707165008, "end_time": 1708374608, "capacity_amount": 64, "user_id": 42}' --header=Content-Type:application/json localhost:4242/reserve`
     // {"start_time":1707165008,"end_time":1708374608,"capacity_amount":64,"user_id":42}
     #[tokio::test]
     async fn test_reservation_route() {
+        let _ = setup_native_logging();
         let route_filter = reservation_route();
 
         // Define JSON parameters for theoretical reservation REST request.
-        //1707165008, 1708374608, 64, 42
         let test_reservation = test_reservation_alpha();
 
         let api_response = warp::test::request()
             .path("/reserve")
             // POST is required for sending RESTful (JSON) requests.
             .method("POST")
-            // Serialize request body into JSON.
             .json(&test_reservation)
             .reply(&route_filter)
             .await;
@@ -100,10 +135,8 @@ mod tests {
 
         let rest_response = api_response.body();
         // Deserialize JSON from HTML body.
-        let jsonified_body: ReservationRequest = from_slice(rest_response).unwrap();
-        assert_eq!(jsonified_body.start_time, 1707165008);
-        assert_eq!(jsonified_body.end_time, 1708374608);
-        assert_eq!(jsonified_body.capacity_amount, 64);
-        assert_eq!(jsonified_body.user_id, 42);
+        let jsonified_body: ReservationResponse = from_slice(rest_response).unwrap();
+        assert_eq!(jsonified_body.is_reserved, true);
+        assert_eq!(jsonified_body.user_message, "reservation created");
     }
 }
