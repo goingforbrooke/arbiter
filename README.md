@@ -145,6 +145,13 @@ Reservation requests must start and end within the provided schedule. While the 
             - cluster capacity
                 - `{1707165008, 1708374608, 64}`
                 - start, end, capacity
+- [ ] remaining todos
+	- [ ] add test for process rez fx
+		- chain: manual check data written to table
+	- [ ] clear tables between tests
+		- between invocations
+	- [ ] nap
+	- [ ] reach goal: improve capacity eval fx to be more than a differnce of sum
 - [ ] ? option for `now` in `start_time`
     - **? consider different outcomes for `start_time`**
         - starts immediately vs starts a week from now
