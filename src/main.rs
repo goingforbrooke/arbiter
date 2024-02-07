@@ -12,7 +12,7 @@ pub use common::ReservationRequest;
 mod datastore;
 use datastore::initialize_database;
 mod hostess;
-use hostess::evaluate_reservation_request;
+use hostess::process_reservation;
 mod logging;
 use logging::setup_native_logging;
 mod restful_api;
