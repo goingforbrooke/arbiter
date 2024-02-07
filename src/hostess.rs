@@ -67,6 +67,12 @@ fn evaluate_reservation_request(
         "Given Capacity Schedule has no reservations"
     );
 
+    // Ensure reservation request begins before it ends.
+    ensure!(
+        reservation_request.start_time < reservation_request.end_time,
+        format!("Invalid reservation request begins before it ends: {reservation_request}")
+    );
+
     // Ensure requested period is in scope of capacity schedule.
     let _in_scope: bool = in_schedule_scope(&reservation_request, &capacity_schedule)?;
 
@@ -123,6 +129,16 @@ mod tests {
     // Edge Cases: Impossible requests that are more than malformed arguments (which would have
     // been caught by the RESTful API)
     //
+
+    #[test]
+    // Request with an impossible timeframe that ends before it begins.
+    fn test_reject_impossible_timeframe() {
+        // First reservation of schedule one with swapped start and end times.
+        let impossible_time_reservation = ReservationRequest::new(1708374608, 1707165008, 65, 42);
+        let is_reservable =
+            evaluate_reservation_request(impossible_time_reservation, schedule_one());
+        assert!(is_reservable.is_err());
+    }
 
     #[test]
     // Request with a time period that starts before the capacity schedule's scope.
