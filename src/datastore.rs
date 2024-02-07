@@ -9,6 +9,7 @@ use crate::ReservationRequest;
 use log::{debug, error, info, trace, warn};
 
 pub fn initialize_database() -> Result<Client> {
+    info!("Initializing database");
     // Clean old data.
     // todo: Clean up DB on init.
     let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
