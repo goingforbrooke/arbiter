@@ -44,15 +44,15 @@ fn evaluate_reservation_request(
     }
     debug!("Competing reservation usages: {:?}", reservation_capacities);
 
-    // Find lowest total resource capacity among existing reservation's with applicable timeframes.
-    let minimum_capacity: &u32 = match reservation_capacities.iter().min() {
+    // Find most limiting resource capacity among existing reservations during request timeframe
+    let capacity_ceiling: &u32 = match reservation_capacities.iter().min() {
         Some(min_found) => min_found,
         None => return Err(anyhow!("No applicable reservation capacities were found.")),
     };
-    debug!("Limiting factor: {}", minimum_capacity);
+    debug!("Limiting factor: {}", capacity_ceiling);
 
     // Check if lowest available capacity across concurrent reservations can sate request.
-    let is_reservable: bool = minimum_capacity >= &reservation_request.capacity_amount;
+    let is_reservable: bool = capacity_ceiling >= &reservation_request.capacity_amount;
 
     let verbal_decree: &str = if is_reservable { "Approved" } else { "Denied" };
     info!(
