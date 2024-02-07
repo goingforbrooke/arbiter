@@ -210,7 +210,6 @@ mod tests {
     use super::process_reservation;
     use crate::common::test_examples::test_reservation_alpha;
     use crate::common::ReservationRequest;
-    use crate::datastore::test_examples::schedule_one;
 
     //
     // Edge Cases: Impossible requests that are more than malformed arguments (which would have
