@@ -51,31 +51,32 @@ Reservation requests must start and end within the provided schedule. While the 
 ### Plan
 
 - [x] logging
-    - [ ] initialize in `prelude.rs`
+    - ~~[ ] initialize in `prelude.rs`~~
 - [x] RESTful API with some tests
     - [ ] param checking
-        - `start_time` and `end_time` are unix seconds
+        - [ ] ? `start_time` and `end_time` are unix seconds
             - add test
             - throw informative error
-        - random parameters that we didn't ask for (ex. `"emojis": "lol"`)
+        - [ ] random parameters that we didn't ask for (ex. `"emojis": "lol"`)
             - add test
             - throw informative error
-    - POST `reserve(start_time, end_time, capacity_amount, user_id)`
+    - [x] POST `reserve(start_time, end_time, capacity_amount, user_id)`
         - original: `reserve(start_time, end_time, amount)`
         - add `user_id` for BI/marketing teams benefit
 - [ ] work out logic behind REST calls
     - test client tests
         - expected behavior
             - other stuff
-                - `now()` is `start_time`
+                - [ ] `now()` is `start_time`
                     - **? consider different outcomes for `start_time`**
                         - starts immediately vs starts a week from now
                             - now: account for spinup time?
                             - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
-                - edge case: request is larger than total capacity
+                - [ ] ~~edge case: request is larger than total capacity~~
+                    - > need to find in-situ b/c total cluster capacity isn't set.
                     - from prompt
                         - Here a ‘resource’ is represented simply as an integer smaller than the total capacity.
-            - ... **within** a timeframe fence
+            - [x] ... **within** a timeframe fence
                 - capacity **is** available -> allocate (add to db); return success
                     - start time
                         - now
@@ -83,7 +84,7 @@ Reservation requests must start and end within the provided schedule. While the 
                         - not-now
                             - allocate (add to db), return reservation complete. UID: 4242
                 - capacity **not** available -> return sorry
-            - ... **across** timeframe fences (need fx for combining inter-timeframe queries: "Create interfaces for the service to interact with the data store")
+            - [x] ... **across** timeframe fences (need fx for combining inter-timeframe queries: "Create interfaces for the service to interact with the data store")
                 - capacity **is** available -> allocate (add to db); return success
                 - capacity **not** available -> return sorry
         - edge cases
@@ -91,7 +92,7 @@ Reservation requests must start and end within the provided schedule. While the 
                     - assume the worst: no capacity available
                         - default to zero
                         - error message: while resource may be available for the period you gave, it's outside of Arbiter's purview. Please choose a timeframe between {schedule_max} and {schedule_min}
-                - `start_time` before `end_time` and vice versa
+                - [x] `start_time` before `end_time` and vice versa
                     - add test
                     - throw informative error
                     - deets
@@ -103,10 +104,10 @@ Reservation requests must start and end within the provided schedule. While the 
                         - too few digits
                     - prompt source
                         - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
-                - ? `amount` exceeds total capacity of cluster at zero utilization?
-            - ? allocation edge cases?
+                - ~~? `amount` exceeds total capacity of cluster at zero utilization?~~
+            - [ ] ? allocation edge cases?
                 - ensure 15% "float" capacity for "just-wanna-try-it" folks
-- [ ] migrate file to SQL DB backing 
+- [ ] migrate ~~file~~ struct to SQL DB backing
     - tables
         - user requests
             - user_id, start, end, denied/allowed (bool)
@@ -120,6 +121,10 @@ Reservation requests must start and end within the provided schedule. While the 
 
 ### Future: nice-to-haves
 
+- user ID tracking
+    - BI folks: what should we include in the next datacenter that we build?
+    - marketing folks: what's selling
+    - SRE dashboard: is something busted in a weird way
 - convert to unixtime object ASAP instead of `int`
 - Swagger spec docs for RESTful API
 - add test for RESTful API initialization
@@ -131,10 +136,6 @@ Reservation requests must start and end within the provided schedule. While the 
         - polynomial "sliders" (y=mx+b)
             - x: time
             - y: capacity
-- user ID tracking
-    - BI folks: what should we include in the next datacenter that we build?
-    - marketing folks: what's selling
-    - SRE dashboard: is something busted in a weird way
 - Add testable `Examples` to fx docstrings
 
 ### Known Unknowns
