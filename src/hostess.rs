@@ -9,6 +9,40 @@ use log::{debug, error, info, trace, warn};
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
+/// Validate a capacity request as being in Arbiter's purview.
+fn in_schedule_scope(
+    reservation_request: &ReservationRequest,
+    capacity_schedule: &CapacitySchedule,
+) -> Result<bool> {
+    // todo: Optimize scope check iterators.
+    let schedule_begin: i64 = capacity_schedule
+        .reservations
+        .iter()
+        .min_by_key(|existing_reservation| existing_reservation.start_time)
+        .map(|existing_reservation| existing_reservation.start_time)
+        .unwrap();
+    debug!("Found capacity schedule's beginning: {}", schedule_begin);
+    // todo: Optimize scope check iterators.
+    let schedule_end: i64 = capacity_schedule
+        .reservations
+        .iter()
+        .max_by_key(|existing_reservation| existing_reservation.end_time)
+        .map(|existing_reservation| existing_reservation.end_time)
+        .unwrap();
+    debug!("Found capacity schedule's ending: {}", schedule_end);
+    let begins_in_scope: bool = reservation_request.start_time >= schedule_begin;
+    ensure!(begins_in_scope,
+        format!( "Reservation request begins before Arbiter's purview begins on \"{schedule_begin}\": {reservation_request}")
+    );
+    let ends_in_scope: bool = reservation_request.end_time <= schedule_end;
+    ensure!(ends_in_scope,
+        format!( "Reservation request ends before Arbiter's purview begins on \"{schedule_begin}\": {reservation_request}")
+    );
+    let both_in_scope = begins_in_scope && ends_in_scope;
+
+    Ok(both_in_scope)
+}
+
 /// Decide if a user reservation request can be fulfilled.
 ///
 /// The given timeslot's checked against the capacity schedule to see if there's enough idle
@@ -27,6 +61,10 @@ fn evaluate_reservation_request(
         !capacity_schedule.reservations.is_empty(),
         "Given Capacity Schedule has no reservations"
     );
+
+    // Ensure requested period is in scope of capacity schedule.
+    let _in_scope: bool = in_schedule_scope(&reservation_request, &capacity_schedule)?;
+
     debug!("Evaluating {}", reservation_request);
     // Track the total capacity for each timeframe-compatible reservation.
     let mut reservation_capacities: Vec<u32> = Vec::new();
@@ -83,12 +121,11 @@ mod tests {
 
     #[test]
     // Request with a time period that starts before the capacity schedule's scope.
-    fn test_before_schedule_scope() {
+    fn test_reject_before_schedule_scope() {
         // First reservation of first schedule that starts 42 seconds earlier.
         let too_early_reservation = ReservationRequest::new(1707164966, 1708374608, 64, 42);
-        let is_reservable =
-            evaluate_reservation_request(too_early_reservation, schedule_one()).unwrap();
-        assert!(!is_reservable);
+        let is_reservable = evaluate_reservation_request(too_early_reservation, schedule_one());
+        assert!(is_reservable.is_err());
     }
 
     //
