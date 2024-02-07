@@ -10,12 +10,13 @@ use log::{debug, error, info, trace, warn};
 
 pub fn initialize_database() -> Result<Client> {
     // Clean old data.
-    // SWEEP
+    // todo: Clean up DB on init.
     let db_client = Client::connect("host=localhost user=postgres", NoTls)?;
     // Ensure tables exists.
     let _ = create_schedule_tables();
     // Populate tables with dummy data.
     let _ = populate_schedule_tables();
+    info!("Initialized database");
     Ok(db_client)
 }
 
