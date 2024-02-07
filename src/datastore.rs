@@ -11,11 +11,11 @@ use log::{debug, error, info, trace, warn};
 pub fn initialize_database() -> Result<Client> {
     // Clean old data.
     // todo: Clean up DB on init.
-    let db_client = Client::connect("host=localhost user=postgres", NoTls)?;
-    // Ensure tables exists.
-    let _ = create_schedule_tables();
+    let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+    // Ensure tables exist.
+    let _ = create_schedule_tables(&mut db_client);
     // Populate tables with dummy data.
-    let _ = populate_schedule_tables();
+    let _ = populate_schedule_tables(&mut db_client);
     info!("Initialized database");
     Ok(db_client)
 }
@@ -25,8 +25,7 @@ pub fn get_schedule() -> Result<CapacitySchedule> {
     Ok(schedule)
 }
 
-fn create_schedule_tables() -> Result<()> {
-    let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+fn create_schedule_tables(db_client: &mut Client) -> Result<()> {
     let table_title = "capacity_schedule";
     let creation_cmd = format!(
         "CREATE TABLE {} (
@@ -43,8 +42,11 @@ fn create_schedule_tables() -> Result<()> {
     Ok(())
 }
 
-fn populate_schedule_row(existing_reservation: ReservationRequest, table_name: &str) -> Result<()> {
-    let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+fn populate_schedule_row(
+    existing_reservation: ReservationRequest,
+    table_name: &str,
+    db_client: &mut Client,
+) -> Result<()> {
     let insertion_command = format!(
         "INSERT INTO {} \
                      (start_time, end_time, capacity_amount, user_id) \
@@ -59,9 +61,9 @@ fn populate_schedule_row(existing_reservation: ReservationRequest, table_name: &
     Ok(())
 }
 
-fn populate_schedule_tables() -> Result<()> {
+fn populate_schedule_tables(db_client: &mut Client) -> Result<()> {
     for existing_reservation in schedule_one().reservations {
-        populate_schedule_row(existing_reservation, "capacity_schedule")?;
+        populate_schedule_row(existing_reservation, "capacity_schedule", db_client)?;
     }
     //for existing_reservation in schedule_two()
     Ok(())
