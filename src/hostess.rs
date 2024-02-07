@@ -52,7 +52,7 @@ fn in_schedule_scope(
     capacity_schedule: &CapacitySchedule,
 ) -> Result<bool> {
     // todo: Optimize scope check iterators.
-    let schedule_begin: i64 = capacity_schedule
+    let schedule_begin: u32 = capacity_schedule
         .reservations
         .iter()
         .min_by_key(|existing_reservation| existing_reservation.start_time)
@@ -60,7 +60,7 @@ fn in_schedule_scope(
         .unwrap();
     debug!("Found capacity schedule's beginning: {}", schedule_begin);
     // todo: Optimize scope check iterators.
-    let schedule_end: i64 = capacity_schedule
+    let schedule_end: u32 = capacity_schedule
         .reservations
         .iter()
         .max_by_key(|existing_reservation| existing_reservation.end_time)
