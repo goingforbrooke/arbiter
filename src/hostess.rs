@@ -17,6 +17,30 @@ pub fn process_reservation(reservation_request: &ReservationRequest) -> Result<b
     evaluate_reservation_request(&reservation_request, &active_schedule)
 }
 
+/// Ensure that start and end times are valid Unix epochs.
+///
+/// Since there's no maximum or minimum number of seconds before or after Jan 1, 1970,
+/// we'll treat everything from Jan 1, 1970 to Jan 1, 2070 as a valid epoch date. Using 100 years
+/// (3,153,600,000 seconds) keeps us within a `u32` (max 4,294,967,295 seconds).
+///
+/// We can assume that no one wants to reserve capacity in the past, so time before the epcoch ("0")
+/// is ignored. The unsigned-ness of the integer type will bounce negative numbers at the API, but we
+/// check for them here, just to be certain.
+
+fn validate_unix_epoch(suspect_epoch: u32) -> Result<()> {
+    // 365 * 24 * 60 * 60 = 31536000 seconds in a year
+    // 315360000 * 100 = 3153600000 seconds in 100 years
+    // Set validity ceiling to 100 years in future from epoch.
+    let epoch_century: u32 = 3153600000;
+    // If it's a positive number corresponding to a date before 2870...
+    ensure!(suspect_epoch > 0 && suspect_epoch < epoch_century);
+    debug!(
+        "Validated timestamp in unix epoch format: \"{}\"",
+        suspect_epoch
+    );
+    Ok(())
+}
+
 /// Validate a capacity request as being in Arbiter's purview.
 ///
 /// Helper function for `evaluate_reservation_request()` that throws
