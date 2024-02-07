@@ -9,6 +9,45 @@ use log::{debug, error, info, trace, warn};
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
+/// Validate a capacity request as being in Arbiter's purview.
+///
+/// Helper function for `evaluate_reservation_request()` that throws
+/// errors when presented with imposssible allocation requests. It needs
+/// optimization and maybe some enum variants for making more informative
+/// error messages.
+fn in_schedule_scope(
+    reservation_request: &ReservationRequest,
+    capacity_schedule: &CapacitySchedule,
+) -> Result<bool> {
+    // todo: Optimize scope check iterators.
+    let schedule_begin: i64 = capacity_schedule
+        .reservations
+        .iter()
+        .min_by_key(|existing_reservation| existing_reservation.start_time)
+        .map(|existing_reservation| existing_reservation.start_time)
+        .unwrap();
+    debug!("Found capacity schedule's beginning: {}", schedule_begin);
+    // todo: Optimize scope check iterators.
+    let schedule_end: i64 = capacity_schedule
+        .reservations
+        .iter()
+        .max_by_key(|existing_reservation| existing_reservation.end_time)
+        .map(|existing_reservation| existing_reservation.end_time)
+        .unwrap();
+    debug!("Found capacity schedule's ending: {}", schedule_end);
+    let begins_in_scope: bool = reservation_request.start_time >= schedule_begin;
+    ensure!(begins_in_scope,
+        format!( "Reservation request begins before Arbiter's purview begins on \"{schedule_begin}\": {reservation_request}")
+    );
+    let ends_in_scope: bool = reservation_request.end_time <= schedule_end;
+    ensure!(ends_in_scope,
+        format!( "Reservation request ends before Arbiter's purview begins on \"{schedule_begin}\": {reservation_request}")
+    );
+    let both_in_scope = begins_in_scope && ends_in_scope;
+
+    Ok(both_in_scope)
+}
+
 /// Decide if a user reservation request can be fulfilled.
 ///
 /// The given timeslot's checked against the capacity schedule to see if there's enough idle
@@ -25,8 +64,18 @@ fn evaluate_reservation_request(
     // Ensure the given schedule isn't empty.
     ensure!(
         !capacity_schedule.reservations.is_empty(),
-        "Given Capacity Schedule has no reservations."
+        "Given Capacity Schedule has no reservations"
     );
+
+    // Ensure reservation request begins before it ends.
+    ensure!(
+        reservation_request.start_time < reservation_request.end_time,
+        format!("Invalid reservation request begins before it ends: {reservation_request}")
+    );
+
+    // Ensure requested period is in scope of capacity schedule.
+    let _in_scope: bool = in_schedule_scope(&reservation_request, &capacity_schedule)?;
+
     debug!("Evaluating {}", reservation_request);
     // Track the total capacity for each timeframe-compatible reservation.
     let mut reservation_capacities: Vec<u32> = Vec::new();
@@ -47,6 +96,7 @@ fn evaluate_reservation_request(
     // Find most limiting resource capacity among existing reservations during request timeframe
     let capacity_ceiling: &u32 = match reservation_capacities.iter().min() {
         Some(min_found) => min_found,
+        // Throw a runtime error if no limiting factors were found b/c impossible inside schedule.
         None => return Err(anyhow!("No applicable reservation capacities were found.")),
     };
     debug!("Limiting factor: {}", capacity_ceiling);
@@ -77,9 +127,37 @@ mod tests {
     use crate::common::ReservationRequest;
 
     //
-    // Corner Cases: Impossible requests that are more than malformed arguments (which would have
+    // Edge Cases: Impossible requests that are more than malformed arguments (which would have
     // been caught by the RESTful API)
     //
+
+    #[test]
+    // Request with an impossible timeframe that ends before it begins.
+    fn test_reject_impossible_timeframe() {
+        // First reservation of schedule one with swapped start and end times.
+        let impossible_time_reservation = ReservationRequest::new(1708374608, 1707165008, 65, 42);
+        let is_reservable =
+            evaluate_reservation_request(impossible_time_reservation, schedule_one());
+        assert!(is_reservable.is_err());
+    }
+
+    #[test]
+    // Request with a time period that starts before the capacity schedule's scope.
+    fn test_reject_before_schedule_scope() {
+        // First reservation of schedule One that starts 42 seconds earlier.
+        let too_early_reservation = ReservationRequest::new(1707164966, 1708374608, 64, 42);
+        let is_reservable = evaluate_reservation_request(too_early_reservation, schedule_one());
+        assert!(is_reservable.is_err());
+    }
+
+    #[test]
+    // Request with a time period that starts after the capacity schedule's scope.
+    fn test_reject_after_schedule_scope() {
+        // Last reservation of schedule One that ends 42 seconds later.
+        let too_late_reservation = ReservationRequest::new(1711398608, 1713213050, 64, 42);
+        let is_reservable = evaluate_reservation_request(too_late_reservation, schedule_one());
+        assert!(is_reservable.is_err());
+    }
 
     //
     // Happy Paths: (In)sufficent capacity for reservation request, within or across schedule time
