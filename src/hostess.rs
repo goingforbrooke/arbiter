@@ -7,7 +7,7 @@ use anyhow::{anyhow, ensure, Result};
 use log::{debug, error, info, trace, warn};
 
 // Project crates.
-use crate::datastore::get_schedule;
+use crate::datastore::{get_schedule, get_user_reservation_schedule};
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
@@ -137,7 +137,7 @@ fn evaluate_reservation_request(
     let _in_scope: bool = in_schedule_scope(&reservation_request, &capacity_schedule)?;
 
     debug!("Evaluating {}", reservation_request);
-    // Track the total capacity for each timeframe-compatible reservation.
+    // Track the total capacity for each timeframe-compatible capacity reservation.
     let mut reservation_capacities: Vec<u32> = Vec::new();
 
     // Find where the request's period overlaps with existing reservations.
@@ -151,20 +151,39 @@ fn evaluate_reservation_request(
             reservation_capacities.push(existing_reservation.capacity_amount);
         }
     }
-    debug!("Competing reservation usages: {:?}", reservation_capacities);
+    debug!("Competing capacity usages: {:?}", reservation_capacities);
 
-    // todo: account for resrvations w/ new table
+    // Find sum of user capacities so we can check against total capacity ceilings.
+    let mut total_user_reservations = 0;
+
+    let user_reservations: CapacitySchedule = get_user_reservation_schedule().unwrap();
+    // Find where the request's period overlaps with existing reservations.
+    for user_reservation in user_reservations.reservations.iter() {
+        let starts_during: bool = reservation_request.start_time < user_reservation.end_time;
+        let ends_during: bool = reservation_request.end_time > user_reservation.start_time;
+        // If requested timeframe overlaps with a user reservation...
+        if starts_during && ends_during {
+            debug!("Found overlap with existing {}", user_reservation);
+            // todo: ... find how much they overlap so we can suggest right/left alternative timeframes later.
+            total_user_reservations += user_reservation.capacity_amount;
+        }
+    }
+    debug!(
+        "Sum of competing user reservation usages: {:?}",
+        total_user_reservations
+    );
 
     // Find most limiting resource capacity among existing reservations during request timeframe
-    let capacity_ceiling: &u32 = match reservation_capacities.iter().min() {
-        Some(min_found) => min_found,
-        // Throw a runtime error if no limiting factors were found b/c impossible inside schedule.
+    let capacity_ceiling: u32 = match reservation_capacities.iter().min() {
+        Some(min_found) => *min_found,
+        // Throw a runtime error if no limiting factors were found b/c impossible inside schedule bounds
         None => return Err(anyhow!("No applicable reservation capacities were found.")),
     };
     debug!("Limiting factor: {}", capacity_ceiling);
 
     // Check if lowest available capacity across concurrent reservations can sate request.
-    let is_reservable: bool = capacity_ceiling >= &reservation_request.capacity_amount;
+    let is_reservable: bool =
+        capacity_ceiling >= total_user_reservations + reservation_request.capacity_amount;
 
     let verbal_decree: &str = if is_reservable { "Approved" } else { "Denied" };
     info!(

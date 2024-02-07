@@ -57,6 +57,30 @@ pub fn get_schedule() -> Result<CapacitySchedule> {
     Ok(queried_schedule)
 }
 
+/// Get user reservation schedule from Database.
+pub fn get_user_reservation_schedule() -> Result<CapacitySchedule> {
+    let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+    let mut capacities = Vec::new();
+    for query_row in db_client.query(
+        "SELECT id, start_time, end_time, reservation_amount, user_id FROM user_reservations",
+        &[],
+    )? {
+        // todo: Disregard id.
+        let _id: i32 = query_row.get(0);
+        let start_time: u32 = query_row.get(1);
+        let end_time: u32 = query_row.get(2);
+        let reservation_amount: u32 = query_row.get(3);
+        let user_id: u32 = query_row.get(4);
+        let user_reservations =
+            ReservationRequest::new(start_time, end_time, reservation_amount, user_id);
+        capacities.push(user_reservations)
+    }
+    let queried_schedule = CapacitySchedule {
+        reservations: capacities,
+    };
+    Ok(queried_schedule)
+}
+
 fn create_schedule_tables(db_client: &mut Client) -> Result<()> {
     let _ = db_client.execute(
         "CREATE TABLE capacity_schedule (
