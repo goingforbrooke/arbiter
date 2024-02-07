@@ -57,27 +57,43 @@ fn evaluate_reservation_request(
     // todo: Evaluate existing reservations in reverse (newest-to-oldest) so there's fewer to go through.
     for existing_reservation in capacity_schedule.reservations.iter() {
         debug!(
-            "Evaluating against existing reservation: {}",
+            "Evaluating capacity against existing reservation: {}",
             existing_reservation
         );
-        // If requested period starts or ends during an existing reservation...
-        if reservation_request.start_time >= existing_reservation.start_time
-            || reservation_request.end_time <= existing_reservation.end_time
-        {
-            debug!(
-                "Found that existing reservation's timeframe {} applies to reservation request's timeframe {}",
-                existing_reservation, reservation_request
-            );
-            // ... then note concurrent reservation's capacity as a possible limiting factor.
+
+        let starts_during: bool = reservation_request.start_time >= existing_reservation.start_time;
+        let ends_during: bool = reservation_request.end_time <= existing_reservation.end_time;
+
+        if starts_during || ends_during {
             reservation_capacities.push(existing_reservation.capacity_amount);
         }
+
+        //// If requested timeframe starts during an existing reservation...
+        //if starts_during {
+        //    debug!(
+        //        "Found that capacity request period starts during existing reservation timeframe. {} overlaps with {}",
+        //        existing_reservation, reservation_request
+        //    );
+        //}
+
+        //// If requested timeframe ends during an existing reservation...
+        //if ends_during {
+        //    debug!(
+        //        "Found that capacity request period ends during existing reservation timeframe. {} overlaps with {}",
+        //        existing_reservation, reservation_request
+        //    );
+        //    // ... then note concurrent reservation's capacity as a possible limiting factor.
+        //    reservation_capacities.push(existing_reservation.capacity_amount);
+        //}
     }
+    debug!("Competing reservation usages: {:?}", reservation_capacities);
 
     // Find lowest total resource capacity among existing reservation's with applicable timeframes.
     let minimum_capacity: &u32 = match reservation_capacities.iter().min() {
         Some(min_found) => min_found,
         None => return Err(anyhow!("No applicable reservation capacities were found.")),
     };
+    debug!("Limiting factor: {}", minimum_capacity);
 
     // Check if lowest available capacity across concurrent reservations can sate request.
     let is_reservable: bool = minimum_capacity >= &reservation_request.capacity_amount;
@@ -122,7 +138,9 @@ mod tests {
         let _ = setup_native_logging();
         // Reservation request that exactly matches available timeframe and capacity.
         let test_reservation = test_reservation_alpha();
-        let is_reservable = evaluate_reservation_request(test_reservation_alpha(), schedule_one());
+        let is_reservable =
+            evaluate_reservation_request(test_reservation_alpha(), schedule_one()).unwrap();
+        assert!(is_reservable);
     }
 
     // Reservation request that fit neatly inside of a "schedule fence" with insufficient capacity.
