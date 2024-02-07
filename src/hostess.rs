@@ -122,9 +122,18 @@ mod tests {
     #[test]
     // Request with a time period that starts before the capacity schedule's scope.
     fn test_reject_before_schedule_scope() {
-        // First reservation of first schedule that starts 42 seconds earlier.
+        // First reservation of schedule One that starts 42 seconds earlier.
         let too_early_reservation = ReservationRequest::new(1707164966, 1708374608, 64, 42);
         let is_reservable = evaluate_reservation_request(too_early_reservation, schedule_one());
+        assert!(is_reservable.is_err());
+    }
+
+    #[test]
+    // Request with a time period that starts after the capacity schedule's scope.
+    fn test_reject_after_schedule_scope() {
+        // Last reservation of schedule One that ends 42 seconds later.
+        let too_late_reservation = ReservationRequest::new(1711398608, 1713213050, 64, 42);
+        let is_reservable = evaluate_reservation_request(too_late_reservation, schedule_one());
         assert!(is_reservable.is_err());
     }
 
