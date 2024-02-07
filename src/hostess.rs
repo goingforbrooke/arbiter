@@ -24,7 +24,7 @@ fn evaluate_reservation_request(
 ) -> Result<bool> {
     // Ensure the given schedule isn't empty.
     ensure!(
-        capacity_schedule.reservations.is_empty(),
+        !capacity_schedule.reservations.is_empty(),
         "Given Capacity Schedule has no reservations."
     );
     debug!("Evaluating reservation request: {}", reservation_request);
