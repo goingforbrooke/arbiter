@@ -99,6 +99,10 @@ fn evaluate_reservation_request(
         "Given Capacity Schedule has no reservations"
     );
 
+    // Ensure start and stop times are valid unix epochs.
+    validate_unix_epoch(reservation_request.start_time)?;
+    validate_unix_epoch(reservation_request.end_time)?;
+
     // Ensure reservation request begins before it ends.
     ensure!(
         reservation_request.start_time < reservation_request.end_time,
