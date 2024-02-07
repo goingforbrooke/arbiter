@@ -16,7 +16,7 @@ use log::{debug, error, info, trace, warn};
 /// credit: https://stackoverflow.com/questions/15301826/psql-fatal-role-postgres-does-not-exist#comment91332745_15309551
 pub fn initialize_database() -> Result<Client> {
     info!("Initializing database");
-    // Clean old data.
+    let _ = cleanup_database();
     // todo: Clean up DB on init.
     let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
     // Ensure tables exist.
@@ -31,7 +31,7 @@ pub fn initialize_database() -> Result<Client> {
 fn cleanup_database() -> Result<()> {
     let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
     db_client.execute("DROP TABLE capacity_schedule, user_reservations;", &[])?;
-    info("Deleted DB tables: capacity_schedule, user_reservations");
+    info!("Deleted DB tables: capacity_schedule, user_reservations");
     Ok(())
 }
 
