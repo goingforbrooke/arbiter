@@ -251,6 +251,8 @@ mod tests {
 
     // Reservation request that fit neatly inside of a "schedule fence" that has capacity.
     //
+    // **One of two that fails without DB cleanup between invocations**
+    //
     // A laughably easy test that requests exactly what's available in exactly the
     // timeframe where it first becomes available.
     #[test]
@@ -269,6 +271,8 @@ mod tests {
     }
 
     // Reservation request that crosses "schedule fences" that has capacity.
+    //
+    // **One of two that fails without DB cleanup between invocations**
     //
     // This test crosses between the second and third reservations of Schedule One, but doesn't
     // exceed available capacity.
