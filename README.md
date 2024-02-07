@@ -67,11 +67,6 @@ Reservation requests must start and end within the provided schedule. While the 
     - test client tests
         - expected behavior
             - other stuff
-                - [ ] `now()` is `start_time`
-                    - **? consider different outcomes for `start_time`**
-                        - starts immediately vs starts a week from now
-                            - now: account for spinup time?
-                            - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
                 - [ ] ~~edge case: request is larger than total capacity~~
                     - > need to find in-situ b/c total cluster capacity isn't set.
                     - from prompt
@@ -105,8 +100,13 @@ Reservation requests must start and end within the provided schedule. While the 
                     - prompt source
                         - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
                 - ~~? `amount` exceeds total capacity of cluster at zero utilization?~~
-            - [ ] ? allocation edge cases?
-                - ensure 15% "float" capacity for "just-wanna-try-it" folks
+- [ ] attach evaluator to RESTful API
+- [ ] ? convert to unixtime object ASAP instead of `int`
+- [ ] `now()` is `start_time`
+    - **? consider different outcomes for `start_time`**
+        - starts immediately vs starts a week from now
+            - now: account for spinup time?
+            - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
 - [ ] migrate ~~file~~ struct to SQL DB backing
     - tables
         - user requests
@@ -125,10 +125,11 @@ Reservation requests must start and end within the provided schedule. While the 
     - BI folks: what should we include in the next datacenter that we build?
     - marketing folks: what's selling
     - SRE dashboard: is something busted in a weird way
-- convert to unixtime object ASAP instead of `int`
+- ? allocation edge cases?
+    - ensure 15% "float" capacity for "just-wanna-try-it" folks
 - Swagger spec docs for RESTful API
 - add test for RESTful API initialization
-- can't-do-but enhancement suggestions from me
+- enhancement suggestions
     - "negotiator"
         - suggestions
             - next timeframe that capacity is available
@@ -136,6 +137,10 @@ Reservation requests must start and end within the provided schedule. While the 
         - polynomial "sliders" (y=mx+b)
             - x: time
             - y: capacity
+        - audience
+            - API users 
+            - downsteam frontends
+        - ? beginning of walled garden compute market?
 - Add testable `Examples` to fx docstrings
 
 ### Known Unknowns
