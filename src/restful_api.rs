@@ -7,7 +7,9 @@ use log::{debug, error, info, trace, warn};
 use warp::Filter;
 
 // Project crates.
+use crate::datastore::get_schedule;
 use crate::hostess::evaluate_reservation_request;
+use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
 // Greet the user by name.
@@ -28,12 +30,19 @@ fn greeting_route() -> impl Filter<Extract = (String,), Error = warp::Rejection>
 // - `capacity_amount`: Amount of resource you'd like to have allocated.
 // - `user_id`: Your unique identifier.
 fn reservation_route() -> impl Filter<Extract = impl warp::Reply, Error = warp::Rejection> + Copy {
+    //let capacity_schedule: CapacitySchedule = ;
+    info!("Received reservation request");
     warp::path!("reserve")
         // Only POST requests can ferry JSON bodies (*usually*).
         .and(warp::post())
         // Expect JSON body format to follow our definition.
         .and(warp::body::json::<ReservationRequest>())
-        .map(|data: ReservationRequest| warp::reply::json(&data))
+        .map(|reservation_request: ReservationRequest| {
+            let is_reserved: bool =
+                evaluate_reservation_request(reservation_request, get_schedule().unwrap()).unwrap();
+            warp::reply::json(&is_reserved)
+        })
+    //.map(|data: ReservationRequest| warp::reply::json(&data))
 }
 
 #[tokio::main]
@@ -53,6 +62,7 @@ mod tests {
 
     // Project crates.
     use crate::common::test_examples::test_reservation_alpha;
+    use crate::logging::setup_native_logging;
     use crate::restful_api::greeting_route;
     use crate::restful_api::reservation_route;
     use crate::ReservationRequest;
@@ -63,6 +73,7 @@ mod tests {
     // `Hello, Eisenhorn`
     #[tokio::test]
     async fn test_greeting_route() {
+        let _ = setup_native_logging();
         let route_filter = greeting_route();
 
         let api_response = warp::test::request()
@@ -82,6 +93,7 @@ mod tests {
     // {"start_time":1707165008,"end_time":1708374608,"capacity_amount":64,"user_id":42}
     #[tokio::test]
     async fn test_reservation_route() {
+        let _ = setup_native_logging();
         let route_filter = reservation_route();
 
         // Define JSON parameters for theoretical reservation REST request.
