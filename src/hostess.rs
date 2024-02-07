@@ -1,4 +1,5 @@
 // Standard library crates.
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 // External crates.
 use anyhow::{anyhow, ensure, Result};
@@ -6,8 +7,58 @@ use anyhow::{anyhow, ensure, Result};
 use log::{debug, error, info, trace, warn};
 
 // Project crates.
+use crate::datastore::get_schedule;
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
+
+/// Convenience function for getting the active schedule in one place.
+pub fn process_reservation(reservation_request: &ReservationRequest) -> Result<bool> {
+    let active_schedule: CapacitySchedule = get_schedule().unwrap();
+    // See if we're able to meet the reservation request's requirements.
+    evaluate_reservation_request(&reservation_request, &active_schedule)
+}
+
+/// Ensure that reservation begin time is in the future.
+///
+/// No one has a time machine for using caapacity reseved in the past.
+fn starts_in_future(start_time: u32) -> Result<()> {
+    let system_now = SystemTime::now();
+    let time_since_epoch: Duration = system_now.duration_since(UNIX_EPOCH).unwrap();
+    let epoch_now = time_since_epoch.as_secs();
+    ensure!(
+        start_time as u64 > epoch_now,
+        format!(
+            "Reservation request with `start_time` \"{start_time}\" doesn't start in the future."
+        )
+    );
+    Ok(())
+}
+
+/// Ensure that start and end times are valid Unix epochs.
+///
+/// Since there's no maximum or minimum number of seconds before or after Jan 1, 1970,
+/// we'll treat everything from Jan 1, 1970 to Jan 1, 2070 as a valid epoch date. Using 100 years
+/// (3,153,600,000 seconds) keeps us within a `u32` (max 4,294,967,295 seconds).
+///
+/// We can assume that no one wants to reserve capacity in the past, so time before the epcoch ("0")
+/// is ignored. The unsigned-ness of the integer type will bounce negative numbers at the API, but we
+/// check for them here, just to be certain.
+fn validate_unix_epoch(suspect_epoch: u32) -> Result<()> {
+    // 365 * 24 * 60 * 60 = 31536000 seconds in a year
+    // 315360000 * 100 = 3153600000 seconds in 100 years
+    // Set validity ceiling to 100 years in future from epoch.
+    let epoch_century: u32 = 3153600000;
+    // If it's a positive number corresponding to a date before 2870...
+    ensure!(
+        suspect_epoch > 0 && suspect_epoch < epoch_century,
+        format!("Integer \"{suspect_epoch}\" isn't a valid Unix epoch")
+    );
+    debug!(
+        "Validated timestamp in unix epoch format: \"{}\"",
+        suspect_epoch
+    );
+    Ok(())
+}
 
 /// Validate a capacity request as being in Arbiter's purview.
 ///
@@ -20,7 +71,7 @@ fn in_schedule_scope(
     capacity_schedule: &CapacitySchedule,
 ) -> Result<bool> {
     // todo: Optimize scope check iterators.
-    let schedule_begin: i64 = capacity_schedule
+    let schedule_begin: u32 = capacity_schedule
         .reservations
         .iter()
         .min_by_key(|existing_reservation| existing_reservation.start_time)
@@ -28,7 +79,7 @@ fn in_schedule_scope(
         .unwrap();
     debug!("Found capacity schedule's beginning: {}", schedule_begin);
     // todo: Optimize scope check iterators.
-    let schedule_end: i64 = capacity_schedule
+    let schedule_end: u32 = capacity_schedule
         .reservations
         .iter()
         .max_by_key(|existing_reservation| existing_reservation.end_time)
@@ -57,9 +108,9 @@ fn in_schedule_scope(
 /// solution that's easy to modify and reason about. We're not anticipating a ton of requests
 /// every second, so performance isn't the first concern. Rather, the most likely question
 /// to follow an allocation denial is "why not?" Followed shortly by "then when?"
-pub fn evaluate_reservation_request(
-    reservation_request: ReservationRequest,
-    capacity_schedule: CapacitySchedule,
+fn evaluate_reservation_request(
+    reservation_request: &ReservationRequest,
+    capacity_schedule: &CapacitySchedule,
 ) -> Result<bool> {
     // Ensure the given schedule isn't empty.
     ensure!(
@@ -67,11 +118,19 @@ pub fn evaluate_reservation_request(
         "Given Capacity Schedule has no reservations"
     );
 
+    // Ensure start and stop times are valid unix epochs.
+    validate_unix_epoch(reservation_request.start_time)?;
+    validate_unix_epoch(reservation_request.end_time)?;
+
     // Ensure reservation request begins before it ends.
     ensure!(
         reservation_request.start_time < reservation_request.end_time,
         format!("Invalid reservation request begins before it ends: {reservation_request}")
     );
+
+    // Ensure reservation request starts in the future.
+    // temp: disable b/c it interferes with historiccal data.
+    //starts_in_future(reservation_request.start_time);
 
     // Ensure requested period is in scope of capacity schedule.
     let _in_scope: bool = in_schedule_scope(&reservation_request, &capacity_schedule)?;
@@ -137,7 +196,7 @@ mod tests {
         // First reservation of schedule one with swapped start and end times.
         let impossible_time_reservation = ReservationRequest::new(1708374608, 1707165008, 65, 42);
         let is_reservable =
-            evaluate_reservation_request(impossible_time_reservation, schedule_one());
+            evaluate_reservation_request(&impossible_time_reservation, &schedule_one());
         assert!(is_reservable.is_err());
     }
 
@@ -146,7 +205,7 @@ mod tests {
     fn test_reject_before_schedule_scope() {
         // First reservation of schedule One that starts 42 seconds earlier.
         let too_early_reservation = ReservationRequest::new(1707164966, 1708374608, 64, 42);
-        let is_reservable = evaluate_reservation_request(too_early_reservation, schedule_one());
+        let is_reservable = evaluate_reservation_request(&too_early_reservation, &schedule_one());
         assert!(is_reservable.is_err());
     }
 
@@ -155,7 +214,7 @@ mod tests {
     fn test_reject_after_schedule_scope() {
         // Last reservation of schedule One that ends 42 seconds later.
         let too_late_reservation = ReservationRequest::new(1711398608, 1713213050, 64, 42);
-        let is_reservable = evaluate_reservation_request(too_late_reservation, schedule_one());
+        let is_reservable = evaluate_reservation_request(&too_late_reservation, &schedule_one());
         assert!(is_reservable.is_err());
     }
 
@@ -171,7 +230,7 @@ mod tests {
     #[test]
     fn test_within_fences_with_capacity() {
         let is_reservable =
-            evaluate_reservation_request(test_reservation_alpha(), schedule_one()).unwrap();
+            evaluate_reservation_request(&test_reservation_alpha(), &schedule_one()).unwrap();
         assert!(is_reservable);
     }
 
@@ -181,7 +240,7 @@ mod tests {
         // Exact match for slot, but exceeds total capacity by one.
         let too_big_reservation = ReservationRequest::new(1707165008, 1708374608, 65, 42);
         let is_reservable =
-            evaluate_reservation_request(too_big_reservation, schedule_one()).unwrap();
+            evaluate_reservation_request(&too_big_reservation, &schedule_one()).unwrap();
         assert!(!is_reservable);
     }
 
@@ -197,7 +256,7 @@ mod tests {
         let interloper_sufficient_capacity =
             ReservationRequest::new(1708374650, 1711398566, 32, 42);
         let is_reservable =
-            evaluate_reservation_request(interloper_sufficient_capacity, schedule_one()).unwrap();
+            evaluate_reservation_request(&interloper_sufficient_capacity, &schedule_one()).unwrap();
         assert!(is_reservable);
     }
 
@@ -213,7 +272,8 @@ mod tests {
         let interloper_insufficient_capacity =
             ReservationRequest::new(1708374650, 1711398566, 33, 42);
         let is_reservable =
-            evaluate_reservation_request(interloper_insufficient_capacity, schedule_one()).unwrap();
+            evaluate_reservation_request(&interloper_insufficient_capacity, &schedule_one())
+                .unwrap();
         assert!(!is_reservable);
     }
 }
