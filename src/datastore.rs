@@ -27,6 +27,14 @@ pub fn initialize_database() -> Result<Client> {
     Ok(db_client)
 }
 
+/// Delete all known database tables.
+fn cleanup_database() -> Result<()> {
+    let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+    db_client.execute("DROP TABLE capacity_schedule, user_reservations;", &[])?;
+    info("Deleted DB tables: capacity_schedule, user_reservations");
+    Ok(())
+}
+
 ///// Get mocked capacity schedule from testing function.
 //pub fn get_schedule() -> Result<CapacitySchedule> {
 //    let schedule = schedule_one();
