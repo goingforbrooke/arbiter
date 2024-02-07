@@ -63,7 +63,7 @@ Reservation requests must start and end within the provided schedule. While the 
     - [x] POST `reserve(start_time, end_time, capacity_amount, user_id)`
         - original: `reserve(start_time, end_time, amount)`
         - add `user_id` for BI/marketing teams benefit
-- [ ] work out logic behind REST calls
+- [x] work out logic behind REST calls
     - test client tests
         - expected behavior
             - other stuff
