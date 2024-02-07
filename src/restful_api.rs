@@ -7,6 +7,7 @@ use log::{debug, error, info, trace, warn};
 use warp::Filter;
 
 // Project crates.
+use crate::hostess::evaluate_reservation_request;
 use crate::ReservationRequest;
 
 // Greet the user by name.
@@ -31,8 +32,7 @@ fn reservation_route() -> impl Filter<Extract = impl warp::Reply, Error = warp::
         // Only POST requests can ferry JSON bodies (*usually*).
         .and(warp::post())
         // Expect JSON body format to follow our definition.
-        //.and(warp::body::json::<ReservationRequest>())
-        .and(warp::body::json())
+        .and(warp::body::json::<ReservationRequest>())
         .map(|data: ReservationRequest| warp::reply::json(&data))
 }
 
