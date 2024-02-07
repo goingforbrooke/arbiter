@@ -57,7 +57,7 @@ Reservation requests must start and end within the provided schedule. While the 
         - [ ] ? `start_time` and `end_time` are unix seconds
             - add test
             - throw informative error
-        - [ ] random parameters that we didn't ask for (ex. `"emojis": "lol"`)
+        - [x] random parameters that we didn't ask for (ex. `"emojis": "lol"`)
             - add test
             - throw informative error
     - [x] POST `reserve(start_time, end_time, capacity_amount, user_id)`
