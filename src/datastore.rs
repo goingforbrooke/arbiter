@@ -58,19 +58,29 @@ pub fn get_schedule() -> Result<CapacitySchedule> {
 }
 
 fn create_schedule_tables(db_client: &mut Client) -> Result<()> {
-    let table_title = "capacity_schedule";
-    let creation_cmd = format!(
-        "CREATE TABLE {} (
-           id                 SERIAL PRIMARY KEY,
-           start_time         INTEGER NOT NULL,
-           end_time           INTEGER NOT NULL,
-           capacity_amount    INTEGER NOT NULL,
-           user_id            INTEGER NOT NULL
-        )",
-        table_title
+    let _ = db_client.execute(
+        "CREATE TABLE capacity_schedule (
+                                 id                 SERIAL PRIMARY KEY,
+                                 start_time         INTEGER NOT NULL,
+                                 end_time           INTEGER NOT NULL,
+                                 capacity_amount    INTEGER NOT NULL,
+                                 user_id            INTEGER NOT NULL
+                                 )",
+        &[],
     );
-    let _ = db_client.execute(&creation_cmd, &[]);
-    info!("Created DB Table: \"{}\"", table_title);
+    debug!("Created capacity schedule table");
+    let _ = db_client.execute(
+        "CREATE TABLE user_reservations (
+                                 id                 SERIAL PRIMARY KEY,
+                                 start_time         INTEGER NOT NULL,
+                                 end_time           INTEGER NOT NULL,
+                                 reservation_amount INTEGER NOT NULL,
+                                 user_id            INTEGER NOT NULL
+                                 )",
+        &[],
+    );
+    debug!("Created user reservation table");
+    info!("Created DB Tables");
     Ok(())
 }
 
