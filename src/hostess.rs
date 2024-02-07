@@ -74,6 +74,7 @@ mod tests {
     use super::evaluate_reservation_request;
     use crate::common::test_examples::schedule_one;
     use crate::common::test_examples::test_reservation_alpha;
+    use crate::common::ReservationRequest;
     use crate::logging::setup_native_logging;
 
     //
@@ -93,7 +94,6 @@ mod tests {
     #[test]
     fn test_within_fences_with_capacity() {
         let _ = setup_native_logging();
-        // Reservation request that exactly matches available timeframe and capacity.
         let is_reservable =
             evaluate_reservation_request(test_reservation_alpha(), schedule_one()).unwrap();
         assert!(is_reservable);
@@ -101,7 +101,14 @@ mod tests {
 
     // Reservation request that fit neatly inside of a "schedule fence" with insufficient capacity.
     #[test]
-    fn test_within_fences_no_capacity() {}
+    fn test_within_fences_no_capacity() {
+        let _ = setup_native_logging();
+        // Exact match for slot, but exceeds total capacity by one.
+        let too_big_reservation = ReservationRequest::new(1707165008, 1708374608, 65, 42);
+        let is_reservable =
+            evaluate_reservation_request(too_big_reservation, schedule_one()).unwrap();
+        assert!(!is_reservable);
+    }
 
     // Reservation request that crosses "schedule fences" that has capacity.
     #[test]
