@@ -81,6 +81,16 @@ mod tests {
     // been caught by the RESTful API)
     //
 
+    #[test]
+    // Request with a time period that starts before the capacity schedule's scope.
+    fn test_before_schedule_scope() {
+        // First reservation of first schedule that starts 42 seconds earlier.
+        let too_early_reservation = ReservationRequest::new(1707164966, 1708374608, 64, 42);
+        let is_reservable =
+            evaluate_reservation_request(too_early_reservation, schedule_one()).unwrap();
+        assert!(!is_reservable);
+    }
+
     //
     // Happy Paths: (In)sufficent capacity for reservation request, within or across schedule time
     // boundaries.
