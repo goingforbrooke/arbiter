@@ -1,4 +1,5 @@
 // Standard library crates.
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 // External crates.
 use anyhow::{anyhow, ensure, Result};
@@ -17,6 +18,19 @@ pub fn process_reservation(reservation_request: &ReservationRequest) -> Result<b
     evaluate_reservation_request(&reservation_request, &active_schedule)
 }
 
+/// Ensure that reservation begin time is in the future.
+///
+/// No one has a time machine for using caapacity reseved in the past.
+fn starts_in_future(start_time: u32) -> Result<()> {
+    let system_now = SystemTime::now();
+    let time_since_epoch: Duration = system_now.duration_since(UNIX_EPOCH).unwrap();
+    let epoch_now = time_since_epoch.as_secs();
+    ensure!(start_time as u64 > epoch_now,
+        format!("Start times for reservation request with `start_time` \"{start_time}\" doesn't start in the future.")
+    );
+    Ok(())
+}
+
 /// Ensure that start and end times are valid Unix epochs.
 ///
 /// Since there's no maximum or minimum number of seconds before or after Jan 1, 1970,
@@ -26,14 +40,16 @@ pub fn process_reservation(reservation_request: &ReservationRequest) -> Result<b
 /// We can assume that no one wants to reserve capacity in the past, so time before the epcoch ("0")
 /// is ignored. The unsigned-ness of the integer type will bounce negative numbers at the API, but we
 /// check for them here, just to be certain.
-
 fn validate_unix_epoch(suspect_epoch: u32) -> Result<()> {
     // 365 * 24 * 60 * 60 = 31536000 seconds in a year
     // 315360000 * 100 = 3153600000 seconds in 100 years
     // Set validity ceiling to 100 years in future from epoch.
     let epoch_century: u32 = 3153600000;
     // If it's a positive number corresponding to a date before 2870...
-    ensure!(suspect_epoch > 0 && suspect_epoch < epoch_century);
+    ensure!(
+        suspect_epoch > 0 && suspect_epoch < epoch_century,
+        format!("Integer \"{suspect_epoch}\" isn't a valid Unix epoch")
+    );
     debug!(
         "Validated timestamp in unix epoch format: \"{}\"",
         suspect_epoch
@@ -108,6 +124,9 @@ fn evaluate_reservation_request(
         reservation_request.start_time < reservation_request.end_time,
         format!("Invalid reservation request begins before it ends: {reservation_request}")
     );
+
+    // Ensure reservation request starts in the future.
+    //starts_in_future(reservation_request.start_time)?;
 
     // Ensure requested period is in scope of capacity schedule.
     let _in_scope: bool = in_schedule_scope(&reservation_request, &capacity_schedule)?;
