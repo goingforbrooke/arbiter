@@ -120,7 +120,7 @@ mod tests {
     use crate::common::ReservationRequest;
 
     //
-    // Corner Cases: Impossible requests that are more than malformed arguments (which would have
+    // Edge Cases: Impossible requests that are more than malformed arguments (which would have
     // been caught by the RESTful API)
     //
 
