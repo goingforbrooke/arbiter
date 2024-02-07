@@ -10,18 +10,11 @@ use crate::datastore::get_schedule;
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
-/// Evaluate resource reservation requests and execute valid ones.
+/// Convenience function for getting the active schedule in one place.
 pub fn process_reservation(reservation_request: &ReservationRequest) -> Result<bool> {
     let active_schedule: CapacitySchedule = get_schedule().unwrap();
     // See if we're able to meet the reservation request's requirements.
-    let is_valid = evaluate_reservation_request(&reservation_request, &active_schedule)?;
-    //// If the reservation's valid, then make it so.
-    //match is_valid {
-    //    // todo: Add reservation to DB table.
-    //    Ok(_) => info!("success"),
-    //    Err(e) => info!("error occurred: {}", e),
-    //}
-    Ok(is_valid)
+    evaluate_reservation_request(&reservation_request, &active_schedule)
 }
 
 /// Validate a capacity request as being in Arbiter's purview.

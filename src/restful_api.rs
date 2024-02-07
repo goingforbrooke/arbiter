@@ -13,14 +13,14 @@ use crate::ReservationRequest;
 
 /// RESTful API JSON response concerning reservation attempt.
 #[derive(Deserialize, Serialize)]
-struct ReservationAttemptResponse {
+struct ReservationResponse {
     is_reserved: bool,
     user_message: String,
     // todo: Add unique IDs to reservations.
     // "reservation_id": u32
 }
 
-impl ReservationAttemptResponse {
+impl ReservationResponse {
     fn new(is_reserved: bool, user_message: String) -> Self {
         Self {
             is_reserved,
@@ -54,15 +54,17 @@ fn reservation_route() -> impl Filter<Extract = impl warp::Reply, Error = warp::
         // Expect JSON body format to follow our definition.
         .and(warp::body::json::<ReservationRequest>())
         .map(|reservation_request: ReservationRequest| {
+            // Check if the
             let json_response = match process_reservation(&reservation_request) {
                 Ok(is_reserved) => {
-                    ReservationAttemptResponse::new(is_reserved, String::from("success!"))
+                    let evaluation_message = match is_reserved {
+                        true => String::from("reservation created"),
+                        false => String::from("reservation not created"),
+                    };
+                    ReservationResponse::new(is_reserved, evaluation_message)
                 }
-                Err(error_message) => {
-                    ReservationAttemptResponse::new(false, error_message.to_string())
-                }
+                Err(error_message) => ReservationResponse::new(false, error_message.to_string()),
             };
-
             warp::reply::json(&json_response)
         })
     //.map(|data: ReservationRequest| warp::reply::json(&data))
