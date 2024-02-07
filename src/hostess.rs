@@ -6,8 +6,23 @@ use anyhow::{anyhow, ensure, Result};
 use log::{debug, error, info, trace, warn};
 
 // Project crates.
+use crate::datastore::get_schedule;
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
+
+/// Evaluate resource reservation requests and execute valid ones.
+pub fn process_reservation(reservation_request: &ReservationRequest) -> Result<bool> {
+    let active_schedule: CapacitySchedule = get_schedule().unwrap();
+    // See if we're able to meet the reservation request's requirements.
+    let is_valid = evaluate_reservation_request(&reservation_request, &active_schedule)?;
+    //// If the reservation's valid, then make it so.
+    //match is_valid {
+    //    // todo: Add reservation to DB table.
+    //    Ok(_) => info!("success"),
+    //    Err(e) => info!("error occurred: {}", e),
+    //}
+    Ok(is_valid)
+}
 
 /// Validate a capacity request as being in Arbiter's purview.
 ///
@@ -57,9 +72,9 @@ fn in_schedule_scope(
 /// solution that's easy to modify and reason about. We're not anticipating a ton of requests
 /// every second, so performance isn't the first concern. Rather, the most likely question
 /// to follow an allocation denial is "why not?" Followed shortly by "then when?"
-pub fn evaluate_reservation_request(
-    reservation_request: ReservationRequest,
-    capacity_schedule: CapacitySchedule,
+fn evaluate_reservation_request(
+    reservation_request: &ReservationRequest,
+    capacity_schedule: &CapacitySchedule,
 ) -> Result<bool> {
     // Ensure the given schedule isn't empty.
     ensure!(
@@ -137,7 +152,7 @@ mod tests {
         // First reservation of schedule one with swapped start and end times.
         let impossible_time_reservation = ReservationRequest::new(1708374608, 1707165008, 65, 42);
         let is_reservable =
-            evaluate_reservation_request(impossible_time_reservation, schedule_one());
+            evaluate_reservation_request(&impossible_time_reservation, &schedule_one());
         assert!(is_reservable.is_err());
     }
 
@@ -146,7 +161,7 @@ mod tests {
     fn test_reject_before_schedule_scope() {
         // First reservation of schedule One that starts 42 seconds earlier.
         let too_early_reservation = ReservationRequest::new(1707164966, 1708374608, 64, 42);
-        let is_reservable = evaluate_reservation_request(too_early_reservation, schedule_one());
+        let is_reservable = evaluate_reservation_request(&too_early_reservation, &schedule_one());
         assert!(is_reservable.is_err());
     }
 
@@ -155,7 +170,7 @@ mod tests {
     fn test_reject_after_schedule_scope() {
         // Last reservation of schedule One that ends 42 seconds later.
         let too_late_reservation = ReservationRequest::new(1711398608, 1713213050, 64, 42);
-        let is_reservable = evaluate_reservation_request(too_late_reservation, schedule_one());
+        let is_reservable = evaluate_reservation_request(&too_late_reservation, &schedule_one());
         assert!(is_reservable.is_err());
     }
 
@@ -171,7 +186,7 @@ mod tests {
     #[test]
     fn test_within_fences_with_capacity() {
         let is_reservable =
-            evaluate_reservation_request(test_reservation_alpha(), schedule_one()).unwrap();
+            evaluate_reservation_request(&test_reservation_alpha(), &schedule_one()).unwrap();
         assert!(is_reservable);
     }
 
@@ -181,7 +196,7 @@ mod tests {
         // Exact match for slot, but exceeds total capacity by one.
         let too_big_reservation = ReservationRequest::new(1707165008, 1708374608, 65, 42);
         let is_reservable =
-            evaluate_reservation_request(too_big_reservation, schedule_one()).unwrap();
+            evaluate_reservation_request(&too_big_reservation, &schedule_one()).unwrap();
         assert!(!is_reservable);
     }
 
@@ -197,7 +212,7 @@ mod tests {
         let interloper_sufficient_capacity =
             ReservationRequest::new(1708374650, 1711398566, 32, 42);
         let is_reservable =
-            evaluate_reservation_request(interloper_sufficient_capacity, schedule_one()).unwrap();
+            evaluate_reservation_request(&interloper_sufficient_capacity, &schedule_one()).unwrap();
         assert!(is_reservable);
     }
 
@@ -213,7 +228,8 @@ mod tests {
         let interloper_insufficient_capacity =
             ReservationRequest::new(1708374650, 1711398566, 33, 42);
         let is_reservable =
-            evaluate_reservation_request(interloper_insufficient_capacity, schedule_one()).unwrap();
+            evaluate_reservation_request(&interloper_insufficient_capacity, &schedule_one())
+                .unwrap();
         assert!(!is_reservable);
     }
 }

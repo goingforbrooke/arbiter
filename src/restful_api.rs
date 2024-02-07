@@ -8,21 +8,24 @@ use serde_derive::{Deserialize, Serialize};
 use warp::Filter;
 
 // Project crates.
-use crate::datastore::get_schedule;
-use crate::hostess::evaluate_reservation_request;
+use crate::hostess::process_reservation;
 use crate::ReservationRequest;
 
 /// RESTful API JSON response concerning reservation attempt.
 #[derive(Deserialize, Serialize)]
 struct ReservationAttemptResponse {
     is_reserved: bool,
+    user_message: String,
     // todo: Add unique IDs to reservations.
     // "reservation_id": u32
 }
 
 impl ReservationAttemptResponse {
-    fn new(is_reserved: bool) -> Self {
-        Self { is_reserved }
+    fn new(is_reserved: bool, user_message: String) -> Self {
+        Self {
+            is_reserved,
+            user_message,
+        }
     }
 }
 
@@ -51,9 +54,15 @@ fn reservation_route() -> impl Filter<Extract = impl warp::Reply, Error = warp::
         // Expect JSON body format to follow our definition.
         .and(warp::body::json::<ReservationRequest>())
         .map(|reservation_request: ReservationRequest| {
-            let is_reserved: bool =
-                evaluate_reservation_request(reservation_request, get_schedule().unwrap()).unwrap();
-            let json_response = ReservationAttemptResponse::new(is_reserved);
+            let json_response = match process_reservation(&reservation_request) {
+                Ok(is_reserved) => {
+                    ReservationAttemptResponse::new(is_reserved, String::from("success!"))
+                }
+                Err(error_message) => {
+                    ReservationAttemptResponse::new(false, error_message.to_string())
+                }
+            };
+
             warp::reply::json(&json_response)
         })
     //.map(|data: ReservationRequest| warp::reply::json(&data))
