@@ -57,6 +57,26 @@ pub fn get_schedule() -> Result<CapacitySchedule> {
     Ok(queried_schedule)
 }
 
+/// Add reservation to user reservation table.
+///
+/// Assume that the reservation's timeframe and capacity have already been validated.
+pub fn add_user_reservation(new_reservation: &ReservationRequest) -> Result<()> {
+    let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;
+    db_client.execute(
+        "INSERT INTO user_reservations 
+                      (start_time, end_time, reservation_amount, user_id) 
+                      VALUES ($1, $2, $3, $4)",
+        &[
+            &new_reservation.start_time,
+            &new_reservation.end_time,
+            &new_reservation.capacity_amount,
+            &new_reservation.user_id,
+        ],
+    )?;
+    info!("Added reservation to DB");
+    Ok(())
+}
+
 /// Get user reservation schedule from Database.
 pub fn get_user_reservation_schedule() -> Result<CapacitySchedule> {
     let mut db_client = Client::connect("host=localhost user=postgres", NoTls)?;

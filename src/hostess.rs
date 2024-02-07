@@ -7,7 +7,7 @@ use anyhow::{anyhow, ensure, Result};
 use log::{debug, error, info, trace, warn};
 
 // Project crates.
-use crate::datastore::{get_schedule, get_user_reservation_schedule};
+use crate::datastore::{add_user_reservation, get_schedule, get_user_reservation_schedule};
 use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
@@ -15,7 +15,12 @@ use crate::ReservationRequest;
 pub fn process_reservation(reservation_request: &ReservationRequest) -> Result<bool> {
     let active_schedule: CapacitySchedule = get_schedule().unwrap();
     // See if we're able to meet the reservation request's requirements.
-    evaluate_reservation_request(&reservation_request, &active_schedule)
+    let is_reservable = evaluate_reservation_request(&reservation_request, &active_schedule);
+    match is_reservable {
+        Ok(true) => add_user_reservation(reservation_request)?,
+        _ => (),
+    };
+    is_reservable
 }
 
 /// Ensure that reservation begin time is in the future.
