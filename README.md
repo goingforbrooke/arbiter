@@ -44,21 +44,34 @@ todo: write contributing section in `README.md`
 
 ## 📐 Design Decisions
 
+### Limitations
+
+Reservation requests must start and end within the provided schedule. While the resource may be available outside of this timeframe, that exceeds Arbiter's purview. Resource capacity outside of the schedule is assumed to be zero.
+
 ### Plan
 
 - [x] logging
+    - ~~[ ] initialize in `prelude.rs`~~
 - [x] RESTful API with some tests
-    - POST `reserve(start_time, end_time, capacity_amount, user_id)`
+    - [ ] param checking
+        - [ ] ? `start_time` and `end_time` are unix seconds
+            - add test
+            - throw informative error
+        - [x] random parameters that we didn't ask for (ex. `"emojis": "lol"`)
+            - add test
+            - throw informative error
+    - [x] POST `reserve(start_time, end_time, capacity_amount, user_id)`
         - original: `reserve(start_time, end_time, amount)`
         - add `user_id` for BI/marketing teams benefit
-- [ ] work out logic behind REST calls
+- [x] work out logic behind REST calls
     - test client tests
         - expected behavior
-            - ? consider different outcomes for `start_time`
-                - starts immediately vs starts a week from now
-                    - now: account for spinup time?
-                    - ? assume that everything reserved at least 30 mins ahead of time is already spun up?
-            - ... **within** timeframe fences
+            - other stuff
+                - [ ] ~~edge case: request is larger than total capacity~~
+                    - > need to find in-situ b/c total cluster capacity isn't set.
+                    - from prompt
+                        - Here a ‘resource’ is represented simply as an integer smaller than the total capacity.
+            - [x] ... **within** a timeframe fence
                 - capacity **is** available -> allocate (add to db); return success
                     - start time
                         - now
@@ -66,19 +79,62 @@ todo: write contributing section in `README.md`
                         - not-now
                             - allocate (add to db), return reservation complete. UID: 4242
                 - capacity **not** available -> return sorry
-            - ... **across** timeframe fences (need fx for combining inter-timeframe queries: "Create interfaces for the service to interact with the data store")
+            - [x] ... **across** timeframe fences (need fx for combining inter-timeframe queries: "Create interfaces for the service to interact with the data store")
                 - capacity **is** available -> allocate (add to db); return success
                 - capacity **not** available -> return sorry
         - edge cases
-            - input checking
-                - `start_time` and `end_time` are in unix epoch format
-                    - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
-                - `start_time` after `end_time`
-                - `end_time` after `start_time`
-                - ? `amount` exceeds total capacity of cluster at zero utilization?
-            - ? allocation edge cases?
-                - ensure 15% "float" capacity for "just-wanna-try-it" folks
-- [ ] migrate file to SQL DB backing 
+                - [x] outside of schedule timeframe
+                    - assume the worst: no capacity available
+                        - default to zero
+                        - error message: while resource may be available for the period you gave, it's outside of Arbiter's purview. Please choose a timeframe between {schedule_max} and {schedule_min}
+                - [x] `start_time` before `end_time` and vice versa
+                    - add test
+                    - throw informative error
+                    - deets
+                        - `start_time` after `end_time`
+                        - `end_time` after `start_time`
+                - `start_time` and `end_time` are valid unix epoch examples
+                    - ex.
+                        - too many digits
+                        - too few digits
+                    - prompt source
+                        - "Times are in unix epoch format. Implement appropriate errors for impossible requests."
+                - ~~? `amount` exceeds total capacity of cluster at zero utilization?~~
+- [x] wire up evaluator and RESTful API
+- [x] **Times are in unix epoch format. Implement appropriate errors for impossible requests.**
+    -  ? convert to unixtime object ASAP instead of `int`
+    -  ? `start_time` and `end_time` are unix seconds
+        - add test
+        - throw informative error
+    - hmmm
+        - ? disallow negative period start or end (never going to reserve before 1970)
+        - Since there's no maximum or minimum number of seconds before or after Jan 1, 1970, could we'll accept everything from Jan 1, 1870  to 100 years from now
+        - start times before now()
+            - allow historical?
+                - decision: 
+                    - **no b/c no one wants to reserve history**
+        - plan 
+            - write to-fail API tests
+                - negative `start_time`
+                - 
+            - disallow all negative submissions to RESTful API with change from `i64` to ?`u32`
+                - allow for reservations up to 100 years in the future
+- [x] Only allow start times if `now()` or in the future
+    - add `ensure` check to rezzy eval to see if `start_time` happens after `now()`
+        - error "can't be in the past"
+    - error implemented here b/c scheduler's server time is more precious than REST API's time
+        - used to decide `now()`
+- [ ] ? Return more specific REST API scheduling errors and handling
+    - **Implement scheduling and error handling for non-viable requests.**
+    - [ ] non-viable requests
+    - types
+        - [x] bad REST arg
+        - [x] bad arg to eval fx
+        - reservation not possible
+- [ ] migrate ~~file~~ struct to SQL DB backing
+    - **Select an appropriate data store.**
+        - **Decide how to represent the data. Be prepared to explain your thinking about the data store and the representation you chose.**
+        - **Create interfaces for the service to interact with the data store.**
     - tables
         - user requests
             - user_id, start, end, denied/allowed (bool)
@@ -89,10 +145,23 @@ todo: write contributing section in `README.md`
             - cluster capacity
                 - `{1707165008, 1708374608, 64}`
                 - start, end, capacity
+- [ ] ? option for `now` in `start_time`
+    - **? consider different outcomes for `start_time`**
+        - starts immediately vs starts a week from now
+            - now: account for spinup time?
+            - ? Assume that everything reserved at least 30 mins ahead of time is already spun up?
 
 ### Future: nice-to-haves
 
-- can't-do-but suggestions
+- user ID tracking
+    - BI folks: what should we include in the next datacenter that we build?
+    - marketing folks: what's selling
+    - SRE dashboard: is something busted in a weird way
+- ? allocation edge cases?
+    - ensure 15% "float" capacity for "just-wanna-try-it" folks
+- Swagger spec docs for RESTful API
+- add test for RESTful API initialization
+- enhancement suggestions
     - "negotiator"
         - suggestions
             - next timeframe that capacity is available
@@ -100,10 +169,11 @@ todo: write contributing section in `README.md`
         - polynomial "sliders" (y=mx+b)
             - x: time
             - y: capacity
-- user ID tracking
-    - BI folks: what should we include in the next datacenter that we build?
-    - marketing folks: what's selling
-    - SRE dashboard: is something busted in a weird way
+        - audience
+            - API users 
+            - downsteam frontends
+        - ? beginning of walled garden compute market?
+- Add testable `Examples` to fx docstrings
 
 ### Known Unknowns
 
