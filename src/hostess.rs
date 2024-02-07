@@ -25,8 +25,11 @@ fn starts_in_future(start_time: u32) -> Result<()> {
     let system_now = SystemTime::now();
     let time_since_epoch: Duration = system_now.duration_since(UNIX_EPOCH).unwrap();
     let epoch_now = time_since_epoch.as_secs();
-    ensure!(start_time as u64 > epoch_now,
-        format!("Start times for reservation request with `start_time` \"{start_time}\" doesn't start in the future.")
+    ensure!(
+        start_time as u64 > epoch_now,
+        format!(
+            "Reservation request with `start_time` \"{start_time}\" doesn't start in the future."
+        )
     );
     Ok(())
 }
@@ -126,7 +129,8 @@ fn evaluate_reservation_request(
     );
 
     // Ensure reservation request starts in the future.
-    //starts_in_future(reservation_request.start_time)?;
+    // temp: disable b/c it interferes with historiccal data.
+    //starts_in_future(reservation_request.start_time);
 
     // Ensure requested period is in scope of capacity schedule.
     let _in_scope: bool = in_schedule_scope(&reservation_request, &capacity_schedule)?;
