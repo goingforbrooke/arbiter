@@ -69,7 +69,7 @@ fn create_schedule_tables(db_client: &mut Client) -> Result<()> {
         )",
         table_title
     );
-    let _ = db_client.batch_execute(&creation_cmd);
+    let _ = db_client.execute(&creation_cmd, &[]);
     info!("Created DB Table: \"{}\"", table_title);
     Ok(())
 }
