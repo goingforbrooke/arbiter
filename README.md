@@ -102,21 +102,18 @@ Reservation requests must start and end within the provided schedule. While the 
                 - ~~? `amount` exceeds total capacity of cluster at zero utilization?~~
 - [x] wire up evaluator and RESTful API
 - missing
+    - hmmm
+        - ? disallow negative period start or end (never going to reserve to 1970)
+        - start times before now()
+            - allow historical?
+        - messy args to REST API: str instead of int
     - **Times are in unix epoch format. Implement appropriate errors for impossible requests.**
         - [ ] ? convert to unixtime object ASAP instead of `int`
         - [ ] ? `start_time` and `end_time` are unix seconds
             - add test
             - throw informative error
-        - [ ] random parameters that we didn't ask for (ex. `"emojis": "lol"`)
-            - add test
-            - throw informative error
 - [ ] Specific scheduling errors and handling
     - **Implement scheduling and error handling for non-viable requests.**
-- [ ] option for `now` in `start_time`
-    - **? consider different outcomes for `start_time`**
-        - starts immediately vs starts a week from now
-            - now: account for spinup time?
-            - ? Assume that everything reserved at least 30 mins ahead of time is already spun up?
 - [ ] migrate ~~file~~ struct to SQL DB backing
     - **Select an appropriate data store.**
         - **Decide how to represent the data. Be prepared to explain your thinking about the data store and the representation you chose.**
@@ -131,6 +128,11 @@ Reservation requests must start and end within the provided schedule. While the 
             - cluster capacity
                 - `{1707165008, 1708374608, 64}`
                 - start, end, capacity
+- [ ] option for `now` in `start_time`
+    - **? consider different outcomes for `start_time`**
+        - starts immediately vs starts a week from now
+            - now: account for spinup time?
+            - ? Assume that everything reserved at least 30 mins ahead of time is already spun up?
 
 ### Future: nice-to-haves
 
