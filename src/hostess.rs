@@ -10,6 +10,11 @@ use crate::CapacitySchedule;
 use crate::ReservationRequest;
 
 /// Validate a capacity request as being in Arbiter's purview.
+///
+/// Helper function for `evaluate_reservation_request()` that throws
+/// errors when presented with imposssible allocation requests. It needs
+/// optimization and maybe some enum variants for making more informative
+/// error messages.
 fn in_schedule_scope(
     reservation_request: &ReservationRequest,
     capacity_schedule: &CapacitySchedule,
