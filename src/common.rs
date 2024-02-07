@@ -15,6 +15,8 @@ use serde_derive::{Deserialize, Serialize};
 /// retrieval. It can represent a request for a portion of a resource or a portion that's already
 /// been allocated.
 #[derive(Deserialize, Serialize)]
+// Reject unknown REST JSON params with descriptive message.
+#[serde(deny_unknown_fields)]
 pub struct ReservationRequest {
     pub start_time: i64,
     pub end_time: i64,
