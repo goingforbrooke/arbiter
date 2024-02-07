@@ -38,13 +38,15 @@ fn evaluate_reservation_request(
             "Evaluating against existing reservation: {}",
             existing_reservation
         );
-        // If this reservation starts within the first reservation's timeframe...
-        if existing_reservation.start_time == reservation_request.start_time {
+        // If requested period starts or ends during an existing reservation...
+        if reservation_request.start_time >= existing_reservation.start_time
+            || reservation_request.end_time <= existing_reservation.end_time
+        {
             debug!(
                 "Found that existing reservation's timeframe {} applies to reservation request's timeframe {}",
                 existing_reservation, reservation_request
             );
-            // ... then note its total capacity as a limiting factor.
+            // ... then note concurrent reservation's capacity as a possible limiting factor.
             reservation_capacities.push(existing_reservation.capacity_amount);
         }
     }
@@ -55,7 +57,7 @@ fn evaluate_reservation_request(
         None => return Err(anyhow!("No applicable reservation capacities were found.")),
     };
 
-    // Check if lowest available capacity across existing reservations can sate request.
+    // Check if lowest available capacity across concurrent reservations can sate request.
     let is_reservable: bool = minimum_capacity >= &reservation_request.capacity_amount;
 
     let verbal_decree: &str = if is_reservable { "Approved" } else { "Denied" };
