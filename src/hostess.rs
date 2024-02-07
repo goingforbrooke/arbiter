@@ -153,6 +153,8 @@ fn evaluate_reservation_request(
     }
     debug!("Competing reservation usages: {:?}", reservation_capacities);
 
+    // todo: account for resrvations w/ new table
+
     // Find most limiting resource capacity among existing reservations during request timeframe
     let capacity_ceiling: &u32 = match reservation_capacities.iter().min() {
         Some(min_found) => min_found,
