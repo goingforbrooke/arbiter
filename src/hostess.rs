@@ -72,11 +72,14 @@ fn evaluate_reservation_request(
 /// Test if schedules are being assessed correctly.
 #[cfg(test)]
 mod tests {
+    // Standard library crates.
     use log::{debug, error, info, trace, warn};
+
     // Project crates.
     use super::evaluate_reservation_request;
     use crate::common::test_examples::schedule_one;
     use crate::common::test_examples::test_reservation_alpha;
+    use crate::logging::setup_native_logging;
 
     //
     // Corner Cases: Impossible requests that are more than malformed arguments (which would have
@@ -94,6 +97,7 @@ mod tests {
     // timeframe where it first becomes available.
     #[test]
     fn test_within_fences_with_capacity() {
+        let _ = setup_native_logging();
         // Reservation request that exactly matches available timeframe and capacity.
         let test_reservation = test_reservation_alpha();
         let is_reservable = evaluate_reservation_request(test_reservation_alpha(), schedule_one());
