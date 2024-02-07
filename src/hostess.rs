@@ -25,7 +25,7 @@ fn evaluate_reservation_request(
     // Ensure the given schedule isn't empty.
     ensure!(
         !capacity_schedule.reservations.is_empty(),
-        "Given Capacity Schedule has no reservations."
+        "Given Capacity Schedule has no reservations"
     );
     debug!("Evaluating {}", reservation_request);
     // Track the total capacity for each timeframe-compatible reservation.
