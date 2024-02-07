@@ -10,6 +10,7 @@ mod common;
 pub use common::CapacitySchedule;
 pub use common::ReservationRequest;
 mod hostess;
+use hostess::evaluate_reservation_request;
 mod logging;
 use logging::setup_native_logging;
 mod restful_api;

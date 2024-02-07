@@ -57,7 +57,7 @@ fn in_schedule_scope(
 /// solution that's easy to modify and reason about. We're not anticipating a ton of requests
 /// every second, so performance isn't the first concern. Rather, the most likely question
 /// to follow an allocation denial is "why not?" Followed shortly by "then when?"
-fn evaluate_reservation_request(
+pub fn evaluate_reservation_request(
     reservation_request: ReservationRequest,
     capacity_schedule: CapacitySchedule,
 ) -> Result<bool> {

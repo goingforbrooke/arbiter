@@ -7,6 +7,7 @@ use log::{debug, error, info, trace, warn};
 use warp::Filter;
 
 // Project crates.
+use crate::hostess::evaluate_reservation_request;
 use crate::ReservationRequest;
 
 // Greet the user by name.
